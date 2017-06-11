@@ -25,7 +25,7 @@
 #include <libsuperderpy.h>
 
 #define NUMBER_OF_PAJONKS 50
-#define FAST_MODE false
+#define FAST_MODE true
 
 struct GamestateResources {
 		// This struct is for every resource allocated and used by your gamestate.
@@ -119,7 +119,7 @@ void Gamestate_Logic(struct Game *game, struct GamestateResources* data) {
 		d->sin += d->speed * 10.0;
 		AnimateCharacter(game, data->pajonczki[i], 1);
 
-		if (rand() % 400 == 0) {
+		if (rand() % 300 == 0) {
 			d->angle += d->angle_mod;
 			d->angle_mod = 0;
 			//d->r = -d->r;
