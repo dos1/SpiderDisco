@@ -87,6 +87,7 @@ void CheckCollision(struct Game *game, struct GamestateResources* data, int x, i
 			SelectSpritesheet(game, data->pajonczki[i], "dead");
 			struct PajonkData *d = data->pajonczki[i]->data;
 			if (!d->dead) {
+				game->data->score++;
 				d->dead = true;
 				dead = true;
 			}
@@ -597,6 +598,7 @@ void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 	// playing music etc.
 	data->blink_counter = 0;
 	data->shake = 0;
+	game->data->score = 0;
 	SelectSpritesheet(game, data->dron, "dance");
 	SetCharacterPosition(game, data->dron, 775, 268, 0);
 

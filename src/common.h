@@ -3,6 +3,7 @@
 
 struct CommonResources {
 		// Fill in with common data accessible from all gamestates.
+		int score;
 };
 
 struct CommonResources* CreateGameData(struct Game *game);

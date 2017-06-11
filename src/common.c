@@ -24,6 +24,7 @@
 
 struct CommonResources* CreateGameData(struct Game *game) {
 	struct CommonResources *data = calloc(1, sizeof(struct CommonResources));
+	data->score = 0;
 	return data;
 }
 
