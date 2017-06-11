@@ -48,6 +48,13 @@ void Gamestate_Logic(struct Game *game, struct GamestateResources* data) {
 
 	if (data->pos > -(100 + 300*game->data->score + 250)) {
 		data->pos -= 0.75;
+
+		ALLEGRO_KEYBOARD_STATE kbd;
+		al_get_keyboard_state(&kbd);
+
+		if (al_key_down(&kbd, ALLEGRO_KEY_SPACE)) {
+			data->pos -= 9.25;
+		}
 	}
 }
 
@@ -79,7 +86,10 @@ char *reasons_common[] = {
   "Met you with your wife",
   "Quite good looking cousin",
   "Was always there for you",
-  "You two had a nice time on a game jam"
+  "You two had a nice time on a game jam",
+  "Never forgot about your birthday",
+  "You used to go out for karaoke",
+  "Taught you how to play ukulele"
 };
 char *reasons_male[] = {
   "Was the witness at your wedding",

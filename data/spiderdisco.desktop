@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=Gra o Dron
-Exec=graodron
-Comment=Gra o Dron
-Icon=graodron
+Name=Spider Disco
+Exec=spiderdisco
+Comment=Spider Disco
+Icon=spiderdisco
 Terminal=false
 Categories=Game;ArcadeGame;
