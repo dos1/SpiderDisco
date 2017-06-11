@@ -21,6 +21,7 @@
 
 #include "../common.h"
 #include <math.h>
+#include <stdio.h>
 #include <libsuperderpy.h>
 
 #define NUMBER_OF_PAJONKS 50
@@ -34,19 +35,33 @@ struct GamestateResources {
 
 		float wind;
 
-		struct Character *pajonczek;
+		struct Character *pajonczek, *dron;
 		struct Character *pajonczki[NUMBER_OF_PAJONKS];
 
 		ALLEGRO_AUDIO_STREAM *music, *elevator;
+
+		ALLEGRO_SAMPLE *boom_sample, *death_sample;
+		ALLEGRO_SAMPLE_INSTANCE *boom, *death;
+
+		ALLEGRO_SAMPLE *oops_samples[17];
+		ALLEGRO_SAMPLE_INSTANCE *oops[17];
 
 		ALLEGRO_BITMAP *bg, *web;
 		ALLEGRO_BITMAP *disco[6], *matryca;
 		ALLEGRO_BITMAP *pola[20][6], *duzepole;
 		ALLEGRO_BITMAP *listek03, *roslinka04, *wp05, *listek1, *listek2, *listek3, *cien;
 
-		ALLEGRO_BITMAP *tmp, *mask;
+		ALLEGRO_BITMAP *nozka1, *nozka2, *nozka3, *nozka4, *shadow;
+		int nozka;
+		float noga1, noga2, noga3, noga4;
+		float noga1x, noga2x, noga3x, noga4x;
+		float noga1y, noga2y, noga3y, noga4y;
+
+		ALLEGRO_BITMAP *tmp, *mask, *chleb;
 
 		float discocount;
+
+		int shake;
 
 		float pole;
 };
@@ -59,24 +74,62 @@ struct PajonkData {
 		int r;
 		bool right;
 		float sin;
+		bool dead;
 };
 
 int Gamestate_ProgressCount = 892; // number of loading steps as reported by Gamestate_Load
+
+void CheckCollision(struct Game *game, struct GamestateResources* data, int x, int y) {
+	bool dead = false;
+	for (int i=0; i<NUMBER_OF_PAJONKS; i++) {
+		if (IsOnCharacter(game, data->pajonczki[i], x, y) || IsOnCharacter(game, data->pajonczki[i], x+46, y)
+		    || IsOnCharacter(game, data->pajonczki[i], x, y+24) || IsOnCharacter(game, data->pajonczki[i], x+46, y+24)) {
+			SelectSpritesheet(game, data->pajonczki[i], "dead");
+			struct PajonkData *d = data->pajonczki[i]->data;
+			if (!d->dead) {
+				d->dead = true;
+				dead = true;
+			}
+		}
+	}
+	al_play_sample_instance(data->boom);
+	data->shake = rand() % 10 + 25;
+	if (dead) {
+		al_play_sample_instance(data->death);
+		al_play_sample_instance(data->oops[rand() % 17]);
+	}
+}
 
 void Gamestate_Logic(struct Game *game, struct GamestateResources* data) {
 	// Called 60 times per second. Here you should do all your game logic.
 	data->blink_counter++;
 
+	if (data->shake) {
+		    data->shake--;
+	}
+
 	data->wind += 0.0125;
 	for (int i=0; i<NUMBER_OF_PAJONKS; i++) {
 		struct PajonkData *d = data->pajonczki[i]->data;
+		if (d->dead) continue;
 		d->angle_mod += d->speed * (d->right ? 1 : -1);
 		if (fabs(d->angle_mod) >= d->angle_range) {
 			d->right = !d->right;
 		}
 		d->sin += d->speed * 10.0;
 		AnimateCharacter(game, data->pajonczki[i], 1);
+
+		if (rand() % 400 == 0) {
+			d->angle += d->angle_mod;
+			d->angle_mod = 0;
+			//d->r = -d->r;
+			d->right = rand() % 2;
+			d->dead = false;
+			d->angle_range = (rand() / (float)RAND_MAX) * 0.33 + 0.1;
+			d->speed = (rand() / (float)RAND_MAX) * 0.005 + 0.005;
+		}
 	}
+	AnimateCharacter(game, data->dron, 1);
 	data->discocount += 0.0318;
 	if (data->discocount >= 6) {
 		data->discocount -= 5;
@@ -85,13 +138,56 @@ void Gamestate_Logic(struct Game *game, struct GamestateResources* data) {
 	if (data->pole >= 20*6) {
 		data->pole = 0;
 	}
+
+//	al_draw_bitmap(data->shadow, 845 + 116 + data->noga3x, 150 + 100 + data->noga3y, 0);
+//	al_draw_bitmap(data->shadow, 887 + 195 + data->noga4x, 268 + 125 + data->noga4y, 0);
+//	al_draw_bitmap(data->shadow, 589 + 0 + data->noga1x, 285 + 115 + data->noga1y, 0);
+//	al_draw_bitmap(data->shadow, 683 + 11 + data->noga2x, 379 + 160 + data->noga2y, 0);
+
+	if (data->nozka == 1) {
+		data->noga1 += 0.05;
+		if (data->noga1 > 2*ALLEGRO_PI) {
+			data->nozka++;
+			data->noga1 -= 2*ALLEGRO_PI;
+
+			CheckCollision(game, data, 589 + 0 + data->noga1x, 285 + 115 + data->noga1y);
+		}
+	} else if (data->nozka == 2) {
+		data->noga2 += 0.05;
+		if (data->noga2 > 2*ALLEGRO_PI) {
+			data->nozka++;
+			data->noga2 -= 2*ALLEGRO_PI;
+
+			CheckCollision(game, data, 683 + 11 + data->noga2x, 379 + 160 + data->noga2y);
+		}
+	} else if (data->nozka == 3) {
+		data->noga3 += 0.05;
+		if (data->noga3 > 2*ALLEGRO_PI) {
+			data->nozka++;
+			data->noga3 -= 2*ALLEGRO_PI;
+
+			CheckCollision(game, data, 845 + 116 + data->noga3x, 150 + 100 + data->noga3y);
+		}
+	} else if (data->nozka == 4) {
+		data->noga4 += 0.05;
+		if (data->noga4 > 2*ALLEGRO_PI) {
+			data->nozka=1;
+			data->noga4 -= 2*ALLEGRO_PI;
+
+			CheckCollision(game, data, 887 + 195 + data->noga4x, 268 + 125 + data->noga4y);
+		}
+	}
 }
 
 void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	// Called as soon as possible, but no sooner than next Gamestate_Logic call.
 	// Draw everything to the screen here.
 	al_draw_bitmap(data->bg, -240 + sin(data->wind) * 4, -160,0);
-	al_draw_bitmap(data->disco[(int)data->discocount], 480, 158 + sin(data->wind) * 4, 0);
+
+	int shake = data->shake ? rand() % 10 : 0;
+
+	al_draw_bitmap(data->disco[(int)data->discocount], 480 + shake, 158 + sin(data->wind) * 4 + shake, 0);
+
 
 	int next = (int)data->discocount;
 	next--;
@@ -106,9 +202,9 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	al_set_target_bitmap(data->tmp);
 	al_clear_to_color(al_map_rgba(0,0,0,0));
 
-	al_draw_bitmap(data->disco[prev], 480, 158 + sin(data->wind) * 4, 0);
+	al_draw_bitmap(data->disco[prev], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
 	al_set_blender(ALLEGRO_ADD, ALLEGRO_ZERO, ALLEGRO_ALPHA); // now as a mask
-	al_draw_bitmap(data->duzepole, 480, 158 + sin(data->wind) * 4, 0);
+	al_draw_bitmap(data->duzepole, 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
 	al_set_blender(ALLEGRO_ADD, ALLEGRO_ONE, ALLEGRO_INVERSE_ALPHA);
 
 	al_set_target_backbuffer(game->display);
@@ -118,7 +214,7 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	al_set_target_bitmap(data->tmp);
 	al_clear_to_color(al_map_rgba(0,0,0,0));
 
-	al_draw_bitmap(data->disco[next], 480, 158 + sin(data->wind) * 4, 0);
+	al_draw_bitmap(data->disco[next], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
 
 	//int p = (int)data->pole;
 	//al_draw_bitmap(data->pola[p/6][p%6], 480, 158 + sin(data->wind) * 4, 0);
@@ -127,7 +223,7 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 
 	int p = (int)(data->blink_counter/4.0) % 20;
 	for (int i=0; i<6; i++) {
-		al_draw_bitmap(data->pola[p][i], 480, 158 + sin(data->wind) * 4, 0);
+		al_draw_bitmap(data->pola[p][i], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
 	}
 	al_set_target_bitmap(data->tmp);
 	al_set_blender(ALLEGRO_ADD, ALLEGRO_ZERO, ALLEGRO_ALPHA); // now as a mask
@@ -138,10 +234,27 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	al_draw_bitmap(data->tmp, 0, 0, 0);
 
 
-	al_draw_bitmap(data->web, -38, -160 + sin(data->wind) * 4, 0);
+	al_draw_bitmap(data->web, -38 + shake, -160 + shake + sin(data->wind) * 4, 0);
 
 	for (int i=0; i<NUMBER_OF_PAJONKS; i++) {
 		struct PajonkData *d = data->pajonczki[i]->data;
+		if (!d->dead) continue;
+		int centerx = 900, centery = 525;
+		//d->angle = data->wind; //(rand() / (float)RAND_MAX) * 2*ALLEGRO_PI;
+
+		int r = d->r + sin(d->sin) * 20;
+		int a = sin(d->angle + d->angle_mod) * r;
+		int b = cos(d->angle + d->angle_mod) * r;
+		SetCharacterPosition(game, data->pajonczki[i], centerx + b + shake, centery + a + shake, 0);
+
+		//SetCharacterPositionF(game, data->pajonczki[i], (rand() / (float)RAND_MAX) / 2.5 + 0.3 - 0.05, (rand() / (float)RAND_MAX) / 1.5 + 0.165, 0);
+		DrawCharacter(game, data->pajonczki[i], al_map_rgb(255,255,255), 0);
+	}
+
+
+	for (int i=0; i<NUMBER_OF_PAJONKS; i++) {
+		struct PajonkData *d = data->pajonczki[i]->data;
+		if (d->dead) continue;
 		int centerx = 900, centery = 525;
 		//d->angle = data->wind; //(rand() / (float)RAND_MAX) * 2*ALLEGRO_PI;
 
@@ -154,17 +267,35 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 		DrawCharacter(game, data->pajonczki[i], al_map_rgb(255,255,255), 0);
 	}
 
+
+	SetCharacterPosition(game, data->dron, 775 + cos(data->wind * 5) * 3, 268, 0);
+
+	al_draw_bitmap(data->shadow, 845 + 116 + data->noga3x, 150 + 100 + data->noga3y, 0);
+	al_draw_bitmap(data->shadow, 887 + 195 + data->noga4x, 268 + 125 + data->noga4y, 0);
+	al_draw_bitmap(data->shadow, 589 + 0 + data->noga1x, 285 + 115 + data->noga1y, 0);
+	al_draw_bitmap(data->shadow, 683 + 11 + data->noga2x, 379 + 160 + data->noga2y, 0);
+
+	al_draw_rotated_bitmap(data->nozka3, 12, 148, 845 + 12 + data->noga3x, 150 + 148 + data->noga3y, -(cos(data->noga3 + ALLEGRO_PI) + 1) / 5.0, 0);
+	al_draw_rotated_bitmap(data->nozka4, 15, 108, 887 + 15 + data->noga4x, 268 + 108 + data->noga4y, -(cos(data->noga4 + ALLEGRO_PI) + 1) / 5.0, 0);
+	DrawCharacter(game, data->dron, al_map_rgb(255,255,255), 0);
+	al_draw_rotated_bitmap(data->nozka1, 234, 56, 589 + 234 + data->noga1x, 285 + 56 + data->noga1y, (cos(data->noga1 + ALLEGRO_PI) + 1) / 5.0, 0);
+	al_draw_rotated_bitmap(data->nozka2, 175, 16, 683 + 175 + data->noga2x, 379 + 16 + data->noga2y, (cos(data->noga2 + ALLEGRO_PI) + 1) / 5.0, 0);
+	al_draw_bitmap(data->chleb, 775 + cos(data->wind * 5) * 3, 268, 0);
+
 	al_draw_bitmap(data->listek03, 566, 598,0);
 	al_draw_rotated_bitmap(data->roslinka04, 512, 1390, 1221 + 512, -100 + 1390, sin(data->wind / 2.0 + 2.34) / 50.0, 0);
 	al_draw_bitmap(data->wp05, -240, -160,0);
 
-	al_draw_bitmap(data->listek1, 1065, 644,0);
-	//al_draw_rotated_bitmap(data->listek1, 200, 200, 1065, 644, data->wind, 0);
+	//al_draw_bitmap(data->listek1, 1065, 644,0);
+	al_draw_rotated_bitmap(data->listek1, 920, 430, 1065+920, 644+430, cos(data->wind + 1) / 60.0, 0);
 
 	al_draw_rotated_bitmap(data->listek2, 0, 588, -94, 534 + 588, sin(data->wind / 1.5 + 5.298) / 20.0, 0);
 
 	//al_draw_bitmap(data->listek2, -94, 534,0);
-	al_draw_bitmap(data->listek3, -94, -123,0);
+	//al_draw_bitmap(data->listek3, -94, -123,0);
+	al_draw_rotated_bitmap(data->listek3, 145, 40, -94 + 145, -123 + 40, sin(data->wind / 2.5 + 0.1234) / 30.0, 0);
+
+
 	al_draw_tinted_bitmap(data->cien, al_map_rgba_f(0.1,0.1,0.1,0.4), 1282, -363,0);
 }
 
@@ -174,6 +305,77 @@ void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, 
 	if ((ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE)) {
 		UnloadCurrentGamestate(game); // mark this gamestate to be stopped and unloaded
 		// When there are no active gamestates, the engine will quit.
+	}
+
+	if (ev->type == ALLEGRO_EVENT_MOUSE_AXES) {
+		  int mousex = ev->mouse.dx / (al_get_display_width(game->display) / 1920.0) / 10.0;
+			int mousey = 0;//ev->mouse.dy / (al_get_display_width(game->display) / 1080.0) / 10.0;
+
+			if (data->nozka == 1) {
+				data->noga1x += mousex;
+				data->noga1y += mousey;
+			} else if (data->nozka == 2) {
+				data->noga2x += mousex;
+				data->noga2y += mousey;
+			} else if (data->nozka == 3) {
+				data->noga3x += mousex;
+				data->noga3y += mousey;
+			} else if (data->nozka == 4) {
+				data->noga4x += mousex;
+				data->noga4y += mousey;
+			}
+
+			int range = 25;
+			if (data->noga1x < -range) {
+				data->noga1x = -range;
+			}
+			if (data->noga1x > range) {
+				data->noga1x = range;
+			}
+			if (data->noga2x < -range) {
+				data->noga2x = -range;
+			}
+			if (data->noga2x > range) {
+				data->noga2x = range;
+			}
+			if (data->noga3x < -range) {
+				data->noga3x = -range;
+			}
+			if (data->noga3x > range) {
+				data->noga3x = range;
+			}
+			if (data->noga4x < -range) {
+				data->noga4x = -range;
+			}
+			if (data->noga4x > range) {
+				data->noga4x = range;
+			}
+			if (data->noga1y < -range) {
+				data->noga1y = -range;
+			}
+			if (data->noga1y > range) {
+				data->noga1y = range;
+			}
+			if (data->noga2y < -range) {
+				data->noga2y = -range;
+			}
+			if (data->noga2y > range) {
+				data->noga2y = range;
+			}
+			if (data->noga3y < -range) {
+				data->noga3y = -range;
+			}
+			if (data->noga3y > range) {
+				data->noga3y = range;
+			}
+			if (data->noga4y < -range) {
+				data->noga4y = -range;
+			}
+			if (data->noga4y > range) {
+				data->noga4y = range;
+			}
+
+			al_set_mouse_xy(game->display, al_get_display_width(game->display) / 2, al_get_display_height(game->display) / 2);
 	}
 }
 
@@ -191,9 +393,39 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	al_set_audio_stream_playmode(data->elevator, ALLEGRO_PLAYMODE_LOOP);
 
 
+	data->boom_sample = al_load_sample( GetDataFilePath(game, "boom.flac") );
+	data->boom = al_create_sample_instance(data->boom_sample);
+	al_attach_sample_instance_to_mixer(data->boom, game->audio.fx);
+	al_set_sample_instance_playmode(data->boom, ALLEGRO_PLAYMODE_ONCE);
+	al_set_sample_instance_gain(data->boom, 0.5);
+
+	data->death_sample = al_load_sample( GetDataFilePath(game, "dead.flac") );
+	data->death = al_create_sample_instance(data->death_sample);
+	al_attach_sample_instance_to_mixer(data->death, game->audio.fx);
+	al_set_sample_instance_playmode(data->death, ALLEGRO_PLAYMODE_ONCE);
+	al_set_sample_instance_gain(data->death, 0.5);
+
+
+	for (int i=0; i<17; i++) {
+		char *filename = malloc(255 * sizeof(char));
+		snprintf(filename, 255, "oops/%d.wav", i);
+
+		data->oops_samples[i] = al_load_sample( GetDataFilePath(game, filename) );
+		data->oops[i] = al_create_sample_instance(data->oops_samples[i]);
+		al_attach_sample_instance_to_mixer(data->oops[i], game->audio.voice);
+		al_set_sample_instance_playmode(data->oops[i], ALLEGRO_PLAYMODE_ONCE);
+		free(filename);
+	}
+
 	data->pajonczek = CreateCharacter(game, "pajonczek");
 	RegisterSpritesheet(game, data->pajonczek, "stand");
+	RegisterSpritesheet(game, data->pajonczek, "dead");
 	LoadSpritesheets(game, data->pajonczek);
+
+	data->dron = CreateCharacter(game, "dron");
+	RegisterSpritesheet(game, data->dron, "dance");
+	LoadSpritesheets(game, data->dron);
+
 	progress(game);
 
 	data->bg = al_load_bitmap(GetDataFilePath(game, "bg.png"));
@@ -278,6 +510,13 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	data->disco[5] = al_load_bitmap(GetDataFilePath(game, "01disko05.png"));
 	progress(game);
 
+	data->nozka1 = al_load_bitmap(GetDataFilePath(game, "nozka01.png"));
+	data->nozka2 = al_load_bitmap(GetDataFilePath(game, "nozka02.png"));
+	data->nozka3 = al_load_bitmap(GetDataFilePath(game, "nozka03.png"));
+	data->nozka4 = al_load_bitmap(GetDataFilePath(game, "nozka04.png"));
+	data->shadow = al_load_bitmap(GetDataFilePath(game, "cien.png"));
+	data->chleb = al_load_bitmap(GetDataFilePath(game, "chleb.png"));
+
 	data->music = al_load_audio_stream(GetDataFilePath(game, "startrek.flac"), 4, 1024);
 	al_set_audio_stream_playing(data->music, false);
 	al_attach_audio_stream_to_mixer(data->music, game->audio.music);
@@ -333,6 +572,10 @@ void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 	// Called when this gamestate gets control. Good place for initializing state,
 	// playing music etc.
 	data->blink_counter = 0;
+	data->shake = 0;
+	SelectSpritesheet(game, data->dron, "dance");
+	SetCharacterPosition(game, data->dron, 775, 268, 0);
+
 	for (int i=0; i<NUMBER_OF_PAJONKS; i++) {
 		SelectSpritesheet(game, data->pajonczki[i], "stand");
 		//SetCharacterPositionF(game, data->pajonczki[i], (rand() / (float)RAND_MAX) / 2.5 + 0.3 - 0.05, (rand() / (float)RAND_MAX) / 1.5 + 0.165, 0);
@@ -342,8 +585,9 @@ void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 		d->angle_mod = 0;
 		d->right = rand() % 2;
 		d->r = rand() % 225 + 125;
+		d->dead = false;
 		d->angle_range = (rand() / (float)RAND_MAX) * 0.33 + 0.1;
-		d->speed = (rand() / (float)RAND_MAX) * 0.005 + 0.0066;
+		d->speed = (rand() / (float)RAND_MAX) * 0.005 + 0.005;
 		d->sin = (rand() / (float)RAND_MAX);
 		data->pajonczki[i]->pos_tmp= rand() % 5;
 	}
@@ -352,6 +596,20 @@ void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 	al_set_audio_stream_playing(data->music, true);
 	data->discocount = 0.5;
 	data->pole = 0;
+	data->nozka = 1;
+
+	data->noga1 = 0;
+	data->noga2 = 0;
+	data->noga3 = 0;
+	data->noga4 = 0;
+	data->noga1x = 0;
+	data->noga2x = 0;
+	data->noga3x = 0;
+	data->noga4x = 0;
+	data->noga1y = 0;
+	data->noga2y = 0;
+	data->noga3y = 0;
+	data->noga4y = 0;
 }
 
 void Gamestate_Stop(struct Game *game, struct GamestateResources* data) {
