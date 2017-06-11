@@ -35,7 +35,7 @@ struct GamestateResources {
 
 		float wind;
 
-		struct Character *pajonczek, *dron;
+		struct Character *pajonczek, *dron, *kula;
 		struct Character *pajonczki[NUMBER_OF_PAJONKS];
 
 		ALLEGRO_AUDIO_STREAM *music, *elevator;
@@ -108,6 +108,16 @@ void Gamestate_Logic(struct Game *game, struct GamestateResources* data) {
 		    data->shake--;
 	}
 
+	AnimateCharacter(game, data->kula, 1);
+
+
+float pos = data->blink_counter / 120.0;
+if (pos > 1) {
+	pos = 1;
+}
+  SetCharacterPosition(game, data->kula, 1200, -700 + 600*pos, 0);
+
+
 	data->wind += 0.0125;
 	for (int i=0; i<NUMBER_OF_PAJONKS; i++) {
 		struct PajonkData *d = data->pajonczki[i]->data;
@@ -176,6 +186,10 @@ void Gamestate_Logic(struct Game *game, struct GamestateResources* data) {
 
 			CheckCollision(game, data, 887 + 195 + data->noga4x, 268 + 125 + data->noga4y);
 		}
+	}
+
+	if (!al_get_audio_stream_playing(data->music)) {
+		SwitchCurrentGamestate(game, "outro");
 	}
 }
 
@@ -282,6 +296,10 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	al_draw_rotated_bitmap(data->nozka2, 175, 16, 683 + 175 + data->noga2x, 379 + 16 + data->noga2y, (cos(data->noga2 + ALLEGRO_PI) + 1) / 5.0, 0);
 	al_draw_bitmap(data->chleb, 775 + cos(data->wind * 5) * 3, 268, 0);
 
+
+	DrawCharacter(game, data->kula, al_map_rgb(255,255,255), 0);
+
+
 	al_draw_bitmap(data->listek03, 566, 598,0);
 	al_draw_rotated_bitmap(data->roslinka04, 512, 1390, 1221 + 512, -100 + 1390, sin(data->wind / 2.0 + 2.34) / 50.0, 0);
 	al_draw_bitmap(data->wp05, -240, -160,0);
@@ -297,13 +315,14 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 
 
 	al_draw_tinted_bitmap(data->cien, al_map_rgba_f(0.1,0.1,0.1,0.4), 1282, -363,0);
+
 }
 
 void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, ALLEGRO_EVENT *ev) {
 	// Called for each event in Allegro event queue.
 	// Here you can handle user input, expiring timers etc.
 	if ((ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE)) {
-		UnloadCurrentGamestate(game); // mark this gamestate to be stopped and unloaded
+		SwitchCurrentGamestate(game, "outro"); // mark this gamestate to be stopped and unloaded
 		// When there are no active gamestates, the engine will quit.
 	}
 
@@ -426,6 +445,11 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	RegisterSpritesheet(game, data->dron, "dance");
 	LoadSpritesheets(game, data->dron);
 
+
+	data->kula = CreateCharacter(game, "kula");
+	RegisterSpritesheet(game, data->kula, "kula");
+	LoadSpritesheets(game, data->kula);
+
 	progress(game);
 
 	data->bg = al_load_bitmap(GetDataFilePath(game, "bg.png"));
@@ -520,7 +544,7 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	data->music = al_load_audio_stream(GetDataFilePath(game, "startrek.flac"), 4, 1024);
 	al_set_audio_stream_playing(data->music, false);
 	al_attach_audio_stream_to_mixer(data->music, game->audio.music);
-	al_set_audio_stream_playmode(data->music, ALLEGRO_PLAYMODE_LOOP);
+	al_set_audio_stream_playmode(data->music, ALLEGRO_PLAYMODE_ONCE);
 	progress(game);
 
 	for (int i=0; i<NUMBER_OF_PAJONKS; i++) {
@@ -575,6 +599,9 @@ void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 	data->shake = 0;
 	SelectSpritesheet(game, data->dron, "dance");
 	SetCharacterPosition(game, data->dron, 775, 268, 0);
+
+	SelectSpritesheet(game, data->kula, "kula");
+
 
 	for (int i=0; i<NUMBER_OF_PAJONKS; i++) {
 		SelectSpritesheet(game, data->pajonczki[i], "stand");

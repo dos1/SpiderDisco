@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(graodron C)
+project(spiderdisco C)
 
-SET(LIBSUPERDERPY_GAMENAME "graodron" CACHE INTERNAL "")
-SET(LIBSUPERDERPY_GAMENAME_PRETTY "Gra o Dron" CACHE INTERNAL "")
+SET(LIBSUPERDERPY_GAMENAME "spiderdisco" CACHE INTERNAL "")
+SET(LIBSUPERDERPY_GAMENAME_PRETTY "Spider Disco" CACHE INTERNAL "")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_SOURCE_DIR}/libsuperderpy/cmake")
 

@@ -27,25 +27,25 @@ struct GamestateResources {
 		// It gets created on load and then gets passed around to all other function calls.
 		ALLEGRO_FONT *font;
 		int blink_counter;
+
+		ALLEGRO_BITMAP *bg;
+		ALLEGRO_AUDIO_STREAM *music;
 };
 
 int Gamestate_ProgressCount = 1; // number of loading steps as reported by Gamestate_Load
 
 void Gamestate_Logic(struct Game *game, struct GamestateResources* data) {
 	// Called 60 times per second. Here you should do all your game logic.
-	data->blink_counter++;
-	if (data->blink_counter >= 60) {
-		data->blink_counter = 0;
+	if (data->blink_counter < 120) {
+		data->blink_counter++;
 	}
 }
 
 void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	// Called as soon as possible, but no sooner than next Gamestate_Logic call.
 	// Draw everything to the screen here.
-	if (data->blink_counter < 50) {
-		al_draw_text(data->font, al_map_rgb(255,255,255), game->viewport.width / 2, game->viewport.height / 2,
-		             ALLEGRO_ALIGN_CENTRE, "Nothing to see here, move along!");
-	}
+	al_draw_bitmap(data->bg, -240, -160,0);
+
 }
 
 void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, ALLEGRO_EVENT *ev) {
@@ -63,6 +63,13 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	struct GamestateResources *data = malloc(sizeof(struct GamestateResources));
 	data->font = al_create_builtin_font();
 	progress(game); // report that we progressed with the loading, so the engine can draw a progress bar
+
+	data->bg = al_load_bitmap(GetDataFilePath(game, "cmentarz.png"));
+
+	data->music = al_load_audio_stream(GetDataFilePath(game, "cannonfodder.ogg"), 4, 1024);
+	al_attach_audio_stream_to_mixer(data->music, game->audio.music);
+	al_set_audio_stream_playmode(data->music, ALLEGRO_PLAYMODE_LOOP);
+
 	return data;
 }
 
