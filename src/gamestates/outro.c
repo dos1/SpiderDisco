@@ -20,6 +20,7 @@
  */
 
 #include "../common.h"
+#include <math.h>
 #include <libsuperderpy.h>
 
 struct GamestateResources {
@@ -27,10 +28,11 @@ struct GamestateResources {
 		// It gets created on load and then gets passed around to all other function calls.
 		ALLEGRO_FONT *font;
 		int blink_counter;
+		float counter;
 
 		ALLEGRO_BITMAP *bmp;
 
-		ALLEGRO_BITMAP *bg;
+		ALLEGRO_BITMAP *bg, *bg2;
 		ALLEGRO_AUDIO_STREAM *music;
 
 		ALLEGRO_BITMAP *photo1, *photo2, *photogirl, *wstazka;
@@ -45,6 +47,7 @@ void Gamestate_Logic(struct Game *game, struct GamestateResources* data) {
 	if (data->blink_counter < 120) {
 		data->blink_counter++;
 	}
+	data->counter += 0.0005;
 
 	if (data->pos > -(100 + 300*game->data->score + 250)) {
 		data->pos -= 0.75;
@@ -61,8 +64,9 @@ void Gamestate_Logic(struct Game *game, struct GamestateResources* data) {
 void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	// Called as soon as possible, but no sooner than next Gamestate_Logic call.
 	// Draw everything to the screen here.
-	al_draw_bitmap(data->bg, -240, -160,0);
-	al_draw_bitmap(data->bmp, 1920/2 - 100, data->pos, 0);
+	al_draw_bitmap(data->bg, -240 + sin(data->counter) * 200, -160,0);
+	al_draw_bitmap(data->bg2, -240, -160,0);
+	al_draw_bitmap(data->bmp, 1920/2 - 30, data->pos, 0);
 
 }
 
@@ -106,10 +110,10 @@ char *reasons_female[] = {
 };
 char *names_male[] = {
   "Rob", "John", "Zbyszek", "Frank", "Tom", "Sebastian", "David", "Mark", "Marty", "Marek",
-  "Stefan", "Bob", "Paulo", "Julio", "Max", "Gandalf", "Otto"
+  "Stefan", "Bob", "Paulo", "Julio", "Max", "Gandalf", "Otto", "Steve"
 };
 char *names_female[] = {
-  "Anne", "Mary", "Suzanne", "Ela", "Ola", "Marta", "Julie", "Stephanie"
+  "Anne", "Mary", "Suzanne", "Ela", "Ola", "Marta", "Julie", "Stephanie", "Agata", "Claudia"
 };
 
 void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
@@ -121,7 +125,8 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 
 	//game->data->score = 3;
 
-	data->bg = al_load_bitmap(GetDataFilePath(game, "cmentarz.png"));
+	data->bg = al_load_bitmap(GetDataFilePath(game, "cmentarz_tyl.png"));
+	data->bg2 = al_load_bitmap(GetDataFilePath(game, "cmentarz_przod.png"));
 
 	data->photo1 = al_load_bitmap(GetDataFilePath(game, "polaroid_chlopczyk.png"));
 	data->photo2 = al_load_bitmap(GetDataFilePath(game, "polaroid_chlopczyk2.png"));
@@ -194,7 +199,7 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 
 	}
 
-	al_draw_text(data->font, al_map_rgb(0,0,0), 1920/2, 100+300*game->data->score + 480, ALLEGRO_ALIGN_CENTER, "Fin.");
+	al_draw_text(data->font, al_map_rgb(0,0,0), 1920/2 - 100, 100+300*game->data->score + 480, ALLEGRO_ALIGN_CENTER, "Fin.");
 
 
 	data->music = al_load_audio_stream(GetDataFilePath(game, "cannonfodder.ogg"), 4, 1024);
@@ -216,6 +221,7 @@ void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 	// playing music etc.
 	data->blink_counter = 0;
 	data->pos = 1080;
+	data->counter = 0;
 }
 
 void Gamestate_Stop(struct Game *game, struct GamestateResources* data) {

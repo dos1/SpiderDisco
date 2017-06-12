@@ -1,6 +1,6 @@
 register_gamestate("loading")
 register_gamestate("dosowisko")
 register_gamestate("holypangolin")
-register_gamestate("empty")
+register_gamestate("disco")
 register_gamestate("intro")
 register_gamestate("outro")
