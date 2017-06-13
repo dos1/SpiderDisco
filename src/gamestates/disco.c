@@ -25,7 +25,7 @@
 #include <libsuperderpy.h>
 
 #define NUMBER_OF_PAJONKS 50
-#define FAST_MODE true
+#define FAST_MODE false
 
 struct GamestateResources {
 		// This struct is for every resource allocated and used by your gamestate.
@@ -236,10 +236,45 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	al_set_target_bitmap(data->mask);
 	al_clear_to_color(al_map_rgba(0,0,0,0));
 
-	int p = (int)(data->blink_counter/4.0) % 20;
-	for (int i=0; i<6; i++) {
-		al_draw_bitmap(data->pola[p][i], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
+	int blinkmode = (int)(data->blink_counter/128.0) % 6;
+
+	if ((blinkmode == 0) || (blinkmode == 5)) {
+		int p = (int)(data->blink_counter/4.0) % 20;
+		for (int i=0; i<6; i++) {
+			al_draw_bitmap(data->pola[p][i], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
+		}
+	} else if (blinkmode == 1) {
+		int p = (int)(data->blink_counter/4.0) % 6;
+		for (int i=0; i<20; i++) {
+			al_draw_bitmap(data->pola[i][p], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
+		}
+	} else if (blinkmode == 2) {
+		int k = 0;
+		for (int i=0; i<6; i++) {
+			for (int j=0; j<20; j++) {
+				if (k%2==(int)(data->blink_counter/12.0)%2) {
+					al_draw_bitmap(data->pola[j][i], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
+				}
+				k++;
+			}
+		}
+	} else if (blinkmode == 3) {
+		int p = 5 - (int)(data->blink_counter/6.0) % 6;
+		for (int i=0; i<20; i++) {
+			al_draw_bitmap(data->pola[i][p], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
+		}
+	} else if (blinkmode == 4) {
+		int k = 0;
+		for (int i=0; i<6; i++) {
+			for (int j=0; j<20; j++) {
+				if (k%3==(int)(data->blink_counter/18.0)%3) {
+					al_draw_bitmap(data->pola[j][i], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
+				}
+				k++;
+			}
+		}
 	}
+
 	al_set_target_bitmap(data->tmp);
 	al_set_blender(ALLEGRO_ADD, ALLEGRO_ZERO, ALLEGRO_ALPHA); // now as a mask
 	al_draw_bitmap(data->mask, 0, 0, 0);
@@ -573,7 +608,19 @@ void Gamestate_Unload(struct Game *game, struct GamestateResources* data) {
 		DestroyCharacter(game, data->pajonczki[i]);
 	}
 	DestroyCharacter(game, data->pajonczek);
+	DestroyCharacter(game, data->dron);
+	DestroyCharacter(game, data->kula);
 	al_destroy_audio_stream(data->music);
+
+	al_destroy_sample_instance(data->boom);
+	al_destroy_sample_instance(data->death);
+	al_destroy_sample(data->boom_sample);
+	al_destroy_sample(data->death_sample);
+
+	for (int i=0; i<17; i++) {
+		al_destroy_sample_instance(data->oops[i]);
+		al_destroy_sample(data->oops_samples[i]);
+	}
 
 	al_destroy_bitmap(data->bg);
 	al_destroy_bitmap(data->web);
@@ -584,6 +631,8 @@ void Gamestate_Unload(struct Game *game, struct GamestateResources* data) {
 	al_destroy_bitmap(data->listek2);
 	al_destroy_bitmap(data->listek3);
 	al_destroy_bitmap(data->cien);
+	al_destroy_bitmap(data->matryca);
+	al_destroy_bitmap(data->duzepole);
 
 	al_destroy_bitmap(data->disco[0]);
 	al_destroy_bitmap(data->disco[1]);
@@ -591,6 +640,22 @@ void Gamestate_Unload(struct Game *game, struct GamestateResources* data) {
 	al_destroy_bitmap(data->disco[3]);
 	al_destroy_bitmap(data->disco[4]);
 	al_destroy_bitmap(data->disco[5]);
+
+	for (int i=0; i<20; i++) {
+		for (int j=0; j<6; j++) {
+			al_destroy_bitmap(data->pola[i][j]);
+		}
+	}
+
+	al_destroy_bitmap(data->nozka1);
+	al_destroy_bitmap(data->nozka2);
+	al_destroy_bitmap(data->nozka3);
+	al_destroy_bitmap(data->nozka4);
+	al_destroy_bitmap(data->shadow);
+
+	al_destroy_bitmap(data->mask);
+	al_destroy_bitmap(data->tmp);
+	al_destroy_bitmap(data->chleb);
 
 	free(data);
 }

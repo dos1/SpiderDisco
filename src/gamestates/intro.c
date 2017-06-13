@@ -222,6 +222,8 @@ void Gamestate_Unload(struct Game *game, struct GamestateResources* data) {
 	// Good place for freeing all allocated memory and resources.
 	al_destroy_audio_stream(data->music);
 	TM_Destroy(data->timeline);
+	al_destroy_bitmap(data->bitmap);
+	al_destroy_font(data->font);
 	free(data);
 }
 

@@ -213,6 +213,13 @@ void Gamestate_Unload(struct Game *game, struct GamestateResources* data) {
 	// Called when the gamestate library is being unloaded.
 	// Good place for freeing all allocated memory and resources.
 	al_destroy_font(data->font);
+	al_destroy_bitmap(data->bg);
+	al_destroy_bitmap(data->bg2);
+	al_destroy_bitmap(data->photo1);
+	al_destroy_bitmap(data->photo2);
+	al_destroy_bitmap(data->photogirl);
+	al_destroy_bitmap(data->wstazka);
+	al_destroy_audio_stream(data->music);
 	free(data);
 }
 
