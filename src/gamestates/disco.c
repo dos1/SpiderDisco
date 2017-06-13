@@ -25,7 +25,7 @@
 #include <libsuperderpy.h>
 
 #define NUMBER_OF_PAJONKS 50
-#define FAST_MODE false
+#define FAST_MODE true
 
 struct GamestateResources {
 		// This struct is for every resource allocated and used by your gamestate.
@@ -82,8 +82,8 @@ int Gamestate_ProgressCount = 892; // number of loading steps as reported by Gam
 void CheckCollision(struct Game *game, struct GamestateResources* data, int x, int y) {
 	bool dead = false;
 	for (int i=0; i<NUMBER_OF_PAJONKS; i++) {
-		if (IsOnCharacter(game, data->pajonczki[i], x, y) || IsOnCharacter(game, data->pajonczki[i], x+46, y)
-		    || IsOnCharacter(game, data->pajonczki[i], x, y+24) || IsOnCharacter(game, data->pajonczki[i], x+46, y+24)) {
+		if (IsOnCharacter(game, data->pajonczki[i], x+10, y+10) || IsOnCharacter(game, data->pajonczki[i], x+36, y+10)
+		    || IsOnCharacter(game, data->pajonczki[i], x+10, y+14) || IsOnCharacter(game, data->pajonczki[i], x+36, y+14)) {
 			SelectSpritesheet(game, data->pajonczki[i], "dead");
 			struct PajonkData *d = data->pajonczki[i]->data;
 			if (!d->dead) {
@@ -260,7 +260,7 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 		int r = d->r + sin(d->sin) * 20;
 		int a = sin(d->angle + d->angle_mod) * r;
 		int b = cos(d->angle + d->angle_mod) * r;
-		SetCharacterPosition(game, data->pajonczki[i], centerx + b + shake, centery + a + shake, 0);
+		SetCharacterPosition(game, data->pajonczki[i], centerx + b + shake + 20, centery + a + shake + 20, 0);
 
 		//SetCharacterPositionF(game, data->pajonczki[i], (rand() / (float)RAND_MAX) / 2.5 + 0.3 - 0.05, (rand() / (float)RAND_MAX) / 1.5 + 0.165, 0);
 		DrawCharacter(game, data->pajonczki[i], al_map_rgb(255,255,255), 0);

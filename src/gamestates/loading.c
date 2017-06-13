@@ -48,6 +48,8 @@ void Draw(struct Game *game, struct LoadingResources *data, float p) {
 
 void* Load(struct Game *game) {
 	struct LoadingResources *data = malloc(sizeof(struct LoadingResources));
+	int flags = al_get_new_bitmap_flags();
+	al_add_new_bitmap_flag(ALLEGRO_MAG_LINEAR | ALLEGRO_MIN_LINEAR);
 	al_clear_to_color(al_map_rgb(255,255,255));
 
 	data->loading_bitmap = al_load_bitmap(GetDataFilePath(game, "loading.png"));
@@ -61,6 +63,7 @@ void* Load(struct Game *game) {
 	LoadSpritesheets(game, data->pajonczek);
 	SelectSpritesheet(game, data->pajonczek, "stand");
 	SetCharacterPositionF(game, data->pajonczek, 0.02, 0.9, 0);
+	al_set_new_bitmap_flags(flags);
 
 	return data;
 }
