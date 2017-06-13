@@ -25,7 +25,7 @@
 #include <libsuperderpy.h>
 
 #define NUMBER_OF_PAJONKS 50
-#define FAST_MODE true
+#define FAST_MODE false
 
 struct GamestateResources {
 		// This struct is for every resource allocated and used by your gamestate.
