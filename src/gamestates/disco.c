@@ -61,6 +61,7 @@ struct GamestateResources {
 		float noga1, noga2, noga3, noga4;
 		float noga1x, noga2x, noga3x, noga4x;
 		float noga1y, noga2y, noga3y, noga4y;
+		bool noga1b, noga2b, noga3b, noga4b;
 
 		ALLEGRO_BITMAP *tmp, *mask, *chleb;
 
@@ -123,6 +124,33 @@ if (pos > 1) {
 }
   SetCharacterPosition(game, data->kula, 1200, -700 + 666*pos, 0);
 
+	int range = 25; float speed = 3.5;
+	if ((data->noga1b) && (data->noga1x < range) && (data->nozka == 1)) {
+		data->noga1x+=speed;
+	}
+	if ((data->noga2b) && (data->noga2x < range) && (data->nozka == 2)) {
+		data->noga2x+=speed;
+	}
+	if ((data->noga3b) && (data->noga3x < range) && (data->nozka == 3)) {
+		data->noga3x+=speed;
+	}
+	if ((data->noga4b) && (data->noga4x < range) && (data->nozka == 4)) {
+		data->noga4x+=speed;
+	}
+
+	if ((!data->noga1b) && (data->noga1x > -range) && (data->nozka == 1)) {
+		data->noga1x-=speed;
+	}
+	if ((!data->noga2b) && (data->noga2x > -range) && (data->nozka == 2)) {
+		data->noga2x-=speed;
+	}
+	if ((!data->noga3b) && (data->noga3x > -range) && (data->nozka == 3)) {
+		data->noga3x-=speed;
+	}
+	if ((!data->noga4b) && (data->noga4x > -range) && (data->nozka == 4)) {
+		data->noga4x-=speed;
+	}
+
 
 	data->wind += 0.0125;
 	for (int i=0; i<NUMBER_OF_PAJONKS; i++) {
@@ -174,7 +202,7 @@ if (pos > 1) {
 			data->nozka++;
 			data->noga2 -= 2*ALLEGRO_PI;
 
-			CheckCollision(game, data, 683 + 11 + data->noga2x, 379 + 160 + data->noga2y);
+			CheckCollision(game, data, 683 + 7 + data->noga2x, 379 + 160 + data->noga2y);
 		}
 	} else if (data->nozka == 3) {
 		data->noga3 += 0.05;
@@ -345,7 +373,7 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	al_draw_bitmap(data->shadow, 845 + 116 + data->noga3x, 150 + 100 + data->noga3y, 0);
 	al_draw_bitmap(data->shadow, 887 + 195 + data->noga4x, 268 + 125 + data->noga4y, 0);
 	al_draw_bitmap(data->shadow, 589 + 0 + data->noga1x, 285 + 115 + data->noga1y, 0);
-	al_draw_bitmap(data->shadow, 683 + 11 + data->noga2x, 379 + 160 + data->noga2y, 0);
+	al_draw_bitmap(data->shadow, 683 + 7 + data->noga2x, 379 + 160 + data->noga2y, 0);
 
 	al_draw_rotated_bitmap(data->nozka3, 12, 148, 845 + 12 + data->noga3x, 150 + 148 + data->noga3y, -(cos(data->noga3 + ALLEGRO_PI) + 1) / 5.0, 0);
 	al_draw_rotated_bitmap(data->nozka4, 15, 108, 887 + 15 + data->noga4x, 268 + 108 + data->noga4y, -(cos(data->noga4 + ALLEGRO_PI) + 1) / 5.0, 0);
@@ -384,8 +412,8 @@ void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, 
 		// When there are no active gamestates, the engine will quit.
 	}
 
-	if (ev->type == ALLEGRO_EVENT_MOUSE_AXES) {
-		  int mousex = ev->mouse.dx / (al_get_display_width(game->display) / 1920.0) / 10.0;
+/*	if (ev->type == ALLEGRO_EVENT_MOUSE_AXES) {
+			int mousex = ev->mouse.dx / (al_get_display_width(game->display) / 1920.0) / 10.0;
 			int mousey = 0;//ev->mouse.dy / (al_get_display_width(game->display) / 1080.0) / 10.0;
 
 			if (data->nozka == 1) {
@@ -453,6 +481,30 @@ void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, 
 			}
 
 			al_set_mouse_xy(game->display, al_get_display_width(game->display) / 2, al_get_display_height(game->display) / 2);
+	}
+	*/
+
+	if ((ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_LEFT)) {
+		if (data->nozka == 1) {
+			data->noga1b = false;
+		} else if (data->nozka == 2) {
+			data->noga2b = false;
+		} else if (data->nozka == 3) {
+			data->noga3b = false;
+		} else if (data->nozka == 4) {
+			data->noga4b = false;
+		}
+	}
+	if ((ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_RIGHT)) {
+		if (data->nozka == 1) {
+			data->noga1b = true;
+		} else if (data->nozka == 2) {
+			data->noga2b = true;
+		} else if (data->nozka == 3) {
+			data->noga3b = true;
+		} else if (data->nozka == 4) {
+			data->noga4b = true;
+		}
 	}
 }
 
@@ -788,10 +840,14 @@ void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 	data->noga2 = 0;
 	data->noga3 = 0;
 	data->noga4 = 0;
-	data->noga1x = 0;
-	data->noga2x = 0;
-	data->noga3x = 0;
-	data->noga4x = 0;
+	data->noga1x = 25;
+	data->noga2x = 25;
+	data->noga3x = -25;
+	data->noga4x = -25;
+	data->noga1b = true;
+	data->noga2b = true;
+	data->noga3b = false;
+	data->noga4b = false;
 	data->noga1y = 0;
 	data->noga2y = 0;
 	data->noga3y = 0;

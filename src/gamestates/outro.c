@@ -47,7 +47,8 @@ static const char *reasons_common[] = {
   "Shared the Netflix account with you",
   "Gave the best WALL-E impressions",
   "Was able to perform perfect moonwalk",
-  "Left WoW for some dancing for the first time"
+  "Left WoW for some dancing for the first time",
+  "You met on the Web"
 };
 static const char *reasons_male[] = {
   "Was the witness at your wedding",
@@ -312,6 +313,7 @@ void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 	data->blink_counter = 0;
 	data->pos = 1080;
 	data->counter = 0;
+	PrintConsole(game, "score: %d", game->data->score);
 }
 
 void Gamestate_Stop(struct Game *game, struct GamestateResources* data) {
