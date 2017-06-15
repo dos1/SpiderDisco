@@ -38,7 +38,7 @@ struct GamestateResources {
 		struct Character *pajonczek, *dron, *kula;
 		struct Character *pajonczki[NUMBER_OF_PAJONKS];
 
-		ALLEGRO_AUDIO_STREAM *music, *elevator;
+		ALLEGRO_AUDIO_STREAM *music;//, *elevator;
 
 		ALLEGRO_SAMPLE *boom_sample, *death_sample;
 		ALLEGRO_SAMPLE_INSTANCE *boom, *death;
@@ -48,7 +48,13 @@ struct GamestateResources {
 
 		ALLEGRO_BITMAP *bg, *web;
 		ALLEGRO_BITMAP *disco[6], *matryca;
-		ALLEGRO_BITMAP *pola[20][6], *duzepole;
+		ALLEGRO_BITMAP *duzepole;
+
+		struct {
+				ALLEGRO_BITMAP *bmp;
+				int x1, y1, x2, y2;
+		} pola[20][6];
+
 		ALLEGRO_BITMAP *listek03, *roslinka04, *wp05, *listek1, *listek2, *listek3, *cien;
 
 		ALLEGRO_BITMAP *nozka1, *nozka2, *nozka3, *nozka4, *shadow;
@@ -77,7 +83,7 @@ struct PajonkData {
 		bool dead;
 };
 
-int Gamestate_ProgressCount = 892; // number of loading steps as reported by Gamestate_Load
+int Gamestate_ProgressCount = 260 + NUMBER_OF_PAJONKS; // number of loading steps as reported by Gamestate_Load
 
 void CheckCollision(struct Game *game, struct GamestateResources* data, int x, int y) {
 	bool dead = false;
@@ -225,7 +231,6 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	al_set_target_backbuffer(game->display);
 	al_draw_bitmap(data->tmp, 0, 0, 0);
 
-
 	al_set_target_bitmap(data->tmp);
 	al_clear_to_color(al_map_rgba(0,0,0,0));
 
@@ -241,19 +246,19 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	if ((blinkmode == 0) || (blinkmode == 5)) {
 		int p = (int)(data->blink_counter/4.0) % 20;
 		for (int i=0; i<6; i++) {
-			al_draw_bitmap(data->pola[p][i], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
+			al_draw_bitmap(data->pola[p][i].bmp, data->pola[p][i].x1 + 480 + shake, data->pola[p][i].y1 + 158 + shake + sin(data->wind) * 4, 0);
 		}
 	} else if (blinkmode == 1) {
 		int p = (int)(data->blink_counter/4.0) % 6;
 		for (int i=0; i<20; i++) {
-			al_draw_bitmap(data->pola[i][p], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
+			al_draw_bitmap(data->pola[i][p].bmp, data->pola[i][p].x1 + 480 + shake, data->pola[i][p].y1 + 158 + shake + sin(data->wind) * 4, 0);
 		}
 	} else if (blinkmode == 2) {
 		int k = 0;
 		for (int i=0; i<6; i++) {
 			for (int j=0; j<20; j++) {
 				if (k%2==(int)(data->blink_counter/12.0)%2) {
-					al_draw_bitmap(data->pola[j][i], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
+					al_draw_bitmap(data->pola[j][i].bmp, data->pola[j][i].x1 + 480 + shake, data->pola[j][i].y1 + 158 + shake + sin(data->wind) * 4, 0);
 				}
 				k++;
 			}
@@ -261,14 +266,14 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	} else if (blinkmode == 3) {
 		int p = 5 - (int)(data->blink_counter/6.0) % 6;
 		for (int i=0; i<20; i++) {
-			al_draw_bitmap(data->pola[i][p], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
+			al_draw_bitmap(data->pola[i][p].bmp, data->pola[i][p].x1 + 480 + shake, data->pola[i][p].y1 + 158 + shake + sin(data->wind) * 4, 0);
 		}
 	} else if (blinkmode == 4) {
 		int k = 0;
 		for (int i=0; i<6; i++) {
 			for (int j=0; j<20; j++) {
 				if (k%3==(int)(data->blink_counter/18.0)%3) {
-					al_draw_bitmap(data->pola[j][i], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
+					al_draw_bitmap(data->pola[j][i].bmp, data->pola[j][i].x1 + 480 + shake, data->pola[j][i].y1 + 158 + shake + sin(data->wind) * 4, 0);
 				}
 				k++;
 			}
@@ -442,11 +447,11 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	struct GamestateResources *data = malloc(sizeof(struct GamestateResources));
 	data->font = al_create_builtin_font();
 
-	data->elevator = al_load_audio_stream(GetDataFilePath(game, "elevator.flac"), 4, 1024);
+	/*data->elevator = al_load_audio_stream(GetDataFilePath(game, "elevator.flac"), 4, 1024);
 	al_set_audio_stream_playing(data->elevator, true);
 	al_attach_audio_stream_to_mixer(data->elevator, game->audio.music);
 	al_set_audio_stream_gain(data->elevator, 0.8);
-	al_set_audio_stream_playmode(data->elevator, ALLEGRO_PLAYMODE_LOOP);
+	al_set_audio_stream_playmode(data->elevator, ALLEGRO_PLAYMODE_LOOP);*/
 
 
 	data->boom_sample = al_load_sample( GetDataFilePath(game, "boom.flac") );
@@ -514,33 +519,53 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	data->matryca = al_load_bitmap(GetDataFilePath(game, "matryca.png"));
 	progress(game);
 
+	/*
+	 // mask generation code
 	al_lock_bitmap(data->matryca, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_READONLY);
 	for (int i=0; i<20; i++) {
 		for (int j=0; j<6; j++) {
-			data->pola[i][j] = al_create_bitmap(872, 792);
-			al_lock_bitmap(data->pola[i][j], ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_WRITEONLY);
+			data->pola[i][j].bmp = al_create_bitmap(872, 792);
+			data->pola[i][j].x1 = 1000;
+			data->pola[i][j].y1 = 1000;
+			data->pola[i][j].x2 = -1;
+			data->pola[i][j].y2 = -1;
+			al_lock_bitmap(data->pola[i][j].bmp, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_WRITEONLY);
 		}
 	}
-	data->duzepole = al_create_bitmap(872, 792);
-	al_lock_bitmap(data->duzepole, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_WRITEONLY);
+	data->duzepole.bmp = al_create_bitmap(872, 792);
+	al_lock_bitmap(data->duzepole.bmp, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_WRITEONLY);
 	ALLEGRO_COLOR transparent = al_map_rgba(0, 0, 0, 0);
 	ALLEGRO_COLOR black = al_map_rgba(0, 0, 0, 255);
 	for (int x=0; x<872; x++) {
 		for (int y=0; y<792; y++) {
 			ALLEGRO_COLOR color = al_get_pixel(data->matryca, x, y);
-			for (int i=0; i< (FAST_MODE ? 1 : 20); i++) {
+			for (int i=0; i< (FAST_MODE ? 0 : 20); i++) {
 				for (int j=0; j<6; j++) {
-					al_set_target_bitmap(data->pola[i][j]);
+					al_set_target_bitmap(data->pola[i][j].bmp);
 					al_put_pixel(x, y, transparent);
 					//PrintConsole(game, "r: %d, g: %d", color.r, color.g);
 					if (color.r*255 == 60 + i*10) {
 						if (color.g*255 == 100 + j*30) {
 							al_put_pixel(x, y, black);
+
+							if (data->pola[i][j].x1 > x) {
+								data->pola[i][j].x1 = x;
+							}
+							if (data->pola[i][j].y1 > y) {
+								data->pola[i][j].y1 = y;
+							}
+							if (data->pola[i][j].x2 < x) {
+								data->pola[i][j].x2 = x;
+							}
+							if (data->pola[i][j].y2 < y) {
+								data->pola[i][j].y2 = y;
+							}
+
 						}
 					}
 				}
 			}
-			al_set_target_bitmap(data->duzepole);
+			al_set_target_bitmap(data->duzepole.bmp);
 			if (color.r*255 == 50) {
 				if (color.g*255 == 70) {
 					al_put_pixel(x, y, black);
@@ -551,12 +576,55 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	}
 	for (int i=0; i<20; i++) {
 		for (int j=0; j<6; j++) {
-			al_unlock_bitmap(data->pola[i][j]);
+			al_unlock_bitmap(data->pola[i][j].bmp);
+
+			char filename[255];
+			snprintf(filename, 255, "mask-%d-%d.png", i, j);
+
+			ALLEGRO_BITMAP *tmp;
+			if (data->pola[i][j].x2 == -1) {
+				tmp = al_create_bitmap(1, 1);
+			} else {
+				tmp = al_create_bitmap(data->pola[i][j].x2 - data->pola[i][j].x1 + 1, data->pola[i][j].y2 - data->pola[i][j].y1 + 1);
+			}
+			al_set_target_bitmap(tmp);
+			al_clear_to_color(al_map_rgba(0,0,0,0));
+			al_draw_bitmap(data->pola[i][j].bmp, -data->pola[i][j].x1, -data->pola[i][j].y1, 0);
+
+			al_save_bitmap(filename, tmp);
+
+			ALLEGRO_CONFIG *config = al_create_config();
+			snprintf(filename, 255, "%d", data->pola[i][j].x1);
+			al_set_config_value(config, "", "x", filename);
+			snprintf(filename, 255, "%d", data->pola[i][j].y1);
+			al_set_config_value(config, "", "y", filename);
+			snprintf(filename, 255, "mask-%d-%d.ini", i, j);
+
+			al_save_config_file(filename, config);
 		}
 	}
-	al_unlock_bitmap(data->duzepole);
+	al_unlock_bitmap(data->duzepole.bmp);
 	al_unlock_bitmap(data->matryca);
 	progress(game);
+	*/
+
+	for (int i=0; i<20; i++) {
+		for (int j=0; j<6; j++) {
+			char filename[255];
+			snprintf(filename, 255, "mask/mask-%d-%d.png", i, j);
+
+			data->pola[i][j].bmp = al_load_bitmap(GetDataFilePath(game, filename));
+			progress(game);
+
+			snprintf(filename, 255, "mask/mask-%d-%d.ini", i, j);
+			ALLEGRO_CONFIG *config = al_load_config_file(GetDataFilePath(game, filename));
+
+			data->pola[i][j].x1 = atoi(al_get_config_value(config, "", "x"));
+			data->pola[i][j].y1 = atoi(al_get_config_value(config, "", "y"));
+			progress(game);
+		}
+	}
+	data->duzepole = al_load_bitmap(GetDataFilePath(game, "mask/mask-duze.png"));
 
 	data->disco[0] = al_load_bitmap(GetDataFilePath(game, "01disko00.png"));
 	progress(game);
@@ -577,6 +645,7 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	data->nozka4 = al_load_bitmap(GetDataFilePath(game, "nozka04.png"));
 	data->shadow = al_load_bitmap(GetDataFilePath(game, "cien.png"));
 	data->chleb = al_load_bitmap(GetDataFilePath(game, "chleb.png"));
+	progress(game);
 
 	data->music = al_load_audio_stream(GetDataFilePath(game, "startrek.flac"), 4, 1024);
 	al_set_audio_stream_playing(data->music, false);
@@ -590,10 +659,11 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 		data->pajonczki[i]->shared = true;
 		data->pajonczki[i]->spritesheets = data->pajonczek->spritesheets;
 		data->pajonczki[i]->data = malloc(sizeof(struct PajonkData));
+		progress(game);
 	}
 
-	al_set_audio_stream_playing(data->elevator, false);
-	al_destroy_audio_stream(data->elevator);
+	/*al_set_audio_stream_playing(data->elevator, false);
+	al_destroy_audio_stream(data->elevator);*/
 
 	progress(game); // report that we progressed with the loading, so the engine can draw a progress bar
 	return data;
@@ -643,7 +713,7 @@ void Gamestate_Unload(struct Game *game, struct GamestateResources* data) {
 
 	for (int i=0; i<20; i++) {
 		for (int j=0; j<6; j++) {
-			al_destroy_bitmap(data->pola[i][j]);
+			al_destroy_bitmap(data->pola[i][j].bmp);
 		}
 	}
 
