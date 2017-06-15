@@ -30,7 +30,7 @@ struct GamestateResources {
 		int blink_counter;
 		float counter;
 
-		ALLEGRO_BITMAP *bmp;
+		ALLEGRO_BITMAP *bmp, *tmp;
 
 		ALLEGRO_BITMAP *bg, *bg2;
 		ALLEGRO_AUDIO_STREAM *music;
@@ -123,7 +123,7 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	data->font = al_load_ttf_font(GetDataFilePath(game, "fonts/belligerent.ttf"), 48, 0);
 	progress(game); // report that we progressed with the loading, so the engine can draw a progress bar
 
-	//game->data->score = 3;
+	//game->data->score = 30;
 
 	data->bg = al_load_bitmap(GetDataFilePath(game, "cmentarz_tyl.png"));
 	data->bg2 = al_load_bitmap(GetDataFilePath(game, "cmentarz_przod.png"));
@@ -133,6 +133,8 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	data->photogirl = al_load_bitmap(GetDataFilePath(game, "polaroid_dziewczynka.png"));
 
 	data->wstazka = al_load_bitmap(GetDataFilePath(game, "polaroid_kokardka.png"));
+
+	data->tmp = al_create_bitmap(300, 300);
 
 	data->bmp = al_create_bitmap(1920/2 + 200, 100 + 300*game->data->score + 550);
 	al_set_target_bitmap(data->bmp);
@@ -174,26 +176,23 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 		if (i%2) left = false;
 
 
+		al_set_target_bitmap(data->tmp);
+		al_clear_to_color(al_map_rgba(0,0,0,0));
+		al_draw_scaled_bitmap(photo, 0, 0, al_get_bitmap_width(photo), al_get_bitmap_height(photo),
+		               10, 10, 250, 268, 0);
+		al_draw_text(data->font, al_map_rgb(0,0,0), 25, 225, ALLEGRO_ALIGN_LEFT, name);
+
+		al_draw_bitmap(data->wstazka, 10 + 185 + (rand() / (float)RAND_MAX)*10, 20 + 177 - (rand() / (float)RAND_MAX)*10, 0);
+		al_set_target_bitmap(data->bmp);
+
 		if (left) {
 			//al_draw_text(data->font, al_map_rgb(0,0,0), 10, 100+300*i, ALLEGRO_ALIGN_LEFT, name);
 			DrawWrappedText(data->font, al_map_rgb(0,0,0), 280, 100+300*i+20 + 80, 1920/3, ALLEGRO_ALIGN_LEFT, reason);
 
-			al_draw_scaled_bitmap(photo, 0, 0, al_get_bitmap_width(photo), al_get_bitmap_height(photo),
-			               10, 100+300*i+20, 250, 268, 0);
-
-			al_draw_text(data->font, al_map_rgb(0,0,0), 25, 100+300*i+20 + 215, ALLEGRO_ALIGN_LEFT, name);
-
-
-			al_draw_bitmap(data->wstazka, 10 + 185 - (rand() / (float)RAND_MAX)*10, 100+300*i+20 + 177 + (rand() / (float)RAND_MAX)*10, 0);
+			al_draw_rotated_bitmap(data->tmp, 150, 150, 10 + 150, 100+300*i+10 + 150, -1/24.0, 0);
 		} else {
 			DrawWrappedText(data->font, al_map_rgb(0,0,0), 10, 100+300*i+20 + 80, 1920/3, ALLEGRO_ALIGN_LEFT, reason);
-			al_draw_scaled_bitmap(photo, 0, 0, al_get_bitmap_width(photo), al_get_bitmap_height(photo),
-			                      650, 100+300*i+20, 250, 268, 0);
-
-			al_draw_text(data->font, al_map_rgb(0,0,0), 665, 100+300*i+20 + 215, ALLEGRO_ALIGN_LEFT, name);
-
-			al_draw_bitmap(data->wstazka, 650 + 185 - (rand() / (float)RAND_MAX)*10, 100+300*i+20 + 177 + (rand() / (float)RAND_MAX)*10, 0);
-
+			al_draw_rotated_bitmap(data->tmp, 150, 150, 640 + 150, 100+300*i+10 + 150, 1/24.0, 0);
 		}
 
 
@@ -213,6 +212,7 @@ void Gamestate_Unload(struct Game *game, struct GamestateResources* data) {
 	// Called when the gamestate library is being unloaded.
 	// Good place for freeing all allocated memory and resources.
 	al_destroy_font(data->font);
+	al_destroy_bitmap(data->tmp);
 	al_destroy_bitmap(data->bg);
 	al_destroy_bitmap(data->bg2);
 	al_destroy_bitmap(data->photo1);
