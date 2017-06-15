@@ -121,7 +121,7 @@ float pos = data->blink_counter / 160.0;
 if (pos > 1) {
 	pos = 1;
 }
-  SetCharacterPosition(game, data->kula, 1200, -700 + 600*pos, 0);
+  SetCharacterPosition(game, data->kula, 1200, -700 + 666*pos, 0);
 
 
 	data->wind += 0.0125;
@@ -355,7 +355,7 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	al_draw_bitmap(data->chleb, 775 + cos(data->wind * 5) * 3, 268, 0);
 
 
-	DrawCharacter(game, data->kula, al_map_rgb(255,255,255), 0);
+	DrawScaledCharacter(game, data->kula, al_map_rgb(255,255,255), 0.75, 0.75, 0);
 
 
 	al_draw_bitmap(data->listek03, 566, 598,0);
