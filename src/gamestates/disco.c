@@ -638,6 +638,8 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 
 			data->pola[i][j].x1 = atoi(al_get_config_value(config, "", "x")) + 1;
 			data->pola[i][j].y1 = atoi(al_get_config_value(config, "", "y")) + 2;
+
+			al_destroy_config(config);
 			progress(game);
 		}
 	}
@@ -692,6 +694,7 @@ void Gamestate_Unload(struct Game *game, struct GamestateResources* data) {
 	al_destroy_font(data->font);
 
 	for (int i=0; i<NUMBER_OF_PAJONKS; i++) {
+		free(data->pajonczki[i]->data);
 		DestroyCharacter(game, data->pajonczki[i]);
 	}
 	DestroyCharacter(game, data->pajonczek);
