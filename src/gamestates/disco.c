@@ -25,7 +25,6 @@
 #include <libsuperderpy.h>
 
 #define NUMBER_OF_PAJONKS 50
-#define FAST_MODE false
 
 struct GamestateResources {
 		// This struct is for every resource allocated and used by your gamestate.
@@ -218,14 +217,16 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	next = next%6;
 	next++;
 
-	int prev = (int)(data->blink_counter/15.0) % 6 + 1;
+	int prev = (data->blink_counter/15) % 6 + 1;
+
+	//PrintConsole(game, "disco: %d, prev: %d, next: %d", (int)data->discocount, prev, next);
 
 	al_set_target_bitmap(data->tmp);
 	al_clear_to_color(al_map_rgba(0,0,0,0));
 
 	al_draw_bitmap(data->disco[prev], 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
 	al_set_blender(ALLEGRO_ADD, ALLEGRO_ZERO, ALLEGRO_ALPHA); // now as a mask
-	al_draw_bitmap(data->duzepole, 480 + shake, 158 + shake + sin(data->wind) * 4, 0);
+	al_draw_bitmap(data->duzepole, 480 + shake, 158 + shake + sin(data->wind) * 4 + 2, 0);
 	al_set_blender(ALLEGRO_ADD, ALLEGRO_ONE, ALLEGRO_INVERSE_ALPHA);
 
 	al_set_target_backbuffer(game->display);
@@ -241,15 +242,15 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	al_set_target_bitmap(data->mask);
 	al_clear_to_color(al_map_rgba(0,0,0,0));
 
-	int blinkmode = (int)(data->blink_counter/128.0) % 6;
+	int blinkmode = (data->blink_counter/252) % 6;
 
-	if ((blinkmode == 0) || (blinkmode == 5)) {
-		int p = (int)(data->blink_counter/4.0) % 20;
+	if (blinkmode == 0) {
+		int p = (data->blink_counter/4) % 20;
 		for (int i=0; i<6; i++) {
 			al_draw_bitmap(data->pola[p][i].bmp, data->pola[p][i].x1 + 480 + shake, data->pola[p][i].y1 + 158 + shake + sin(data->wind) * 4, 0);
 		}
 	} else if (blinkmode == 1) {
-		int p = (int)(data->blink_counter/4.0) % 6;
+		int p = (data->blink_counter/9) % 6;
 		for (int i=0; i<20; i++) {
 			al_draw_bitmap(data->pola[i][p].bmp, data->pola[i][p].x1 + 480 + shake, data->pola[i][p].y1 + 158 + shake + sin(data->wind) * 4, 0);
 		}
@@ -257,14 +258,14 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 		int k = 0;
 		for (int i=0; i<6; i++) {
 			for (int j=0; j<20; j++) {
-				if (k%2==(int)(data->blink_counter/12.0)%2) {
+				if (k%2==(data->blink_counter/25)%2) {
 					al_draw_bitmap(data->pola[j][i].bmp, data->pola[j][i].x1 + 480 + shake, data->pola[j][i].y1 + 158 + shake + sin(data->wind) * 4, 0);
 				}
 				k++;
 			}
 		}
 	} else if (blinkmode == 3) {
-		int p = 5 - (int)(data->blink_counter/6.0) % 6;
+		int p = 5 - (data->blink_counter/9) % 6;
 		for (int i=0; i<20; i++) {
 			al_draw_bitmap(data->pola[i][p].bmp, data->pola[i][p].x1 + 480 + shake, data->pola[i][p].y1 + 158 + shake + sin(data->wind) * 4, 0);
 		}
@@ -272,13 +273,29 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 		int k = 0;
 		for (int i=0; i<6; i++) {
 			for (int j=0; j<20; j++) {
-				if (k%3==(int)(data->blink_counter/18.0)%3) {
+				if (k%3==(data->blink_counter/18)%3) {
+					al_draw_bitmap(data->pola[j][i].bmp, data->pola[j][i].x1 + 480 + shake, data->pola[j][i].y1 + 158 + shake + sin(data->wind) * 4, 0);
+				}
+				k++;
+			}
+		}
+	} else if (blinkmode == 5) {
+		int k = 0;
+		for (int i=0; i<6; i++) {
+			for (int j=0; j<20; j++) {
+				if (i%2) {
 					al_draw_bitmap(data->pola[j][i].bmp, data->pola[j][i].x1 + 480 + shake, data->pola[j][i].y1 + 158 + shake + sin(data->wind) * 4, 0);
 				}
 				k++;
 			}
 		}
 	}
+
+/*	for (int i=0; i<6; i++) {
+		for (int j=0; j<20; j++) {
+				al_draw_bitmap(data->pola[j][i].bmp, data->pola[j][i].x1 + 480 + shake, data->pola[j][i].y1 + 158 + shake + sin(data->wind) * 4, 0);
+		}
+	}*/
 
 	al_set_target_bitmap(data->tmp);
 	al_set_blender(ALLEGRO_ADD, ALLEGRO_ZERO, ALLEGRO_ALPHA); // now as a mask
@@ -539,7 +556,7 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	for (int x=0; x<872; x++) {
 		for (int y=0; y<792; y++) {
 			ALLEGRO_COLOR color = al_get_pixel(data->matryca, x, y);
-			for (int i=0; i< (FAST_MODE ? 0 : 20); i++) {
+			for (int i=0; i<20; i++) {
 				for (int j=0; j<6; j++) {
 					al_set_target_bitmap(data->pola[i][j].bmp);
 					al_put_pixel(x, y, transparent);
@@ -619,8 +636,8 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 			snprintf(filename, 255, "mask/mask-%d-%d.ini", i, j);
 			ALLEGRO_CONFIG *config = al_load_config_file(GetDataFilePath(game, filename));
 
-			data->pola[i][j].x1 = atoi(al_get_config_value(config, "", "x"));
-			data->pola[i][j].y1 = atoi(al_get_config_value(config, "", "y"));
+			data->pola[i][j].x1 = atoi(al_get_config_value(config, "", "x")) + 1;
+			data->pola[i][j].y1 = atoi(al_get_config_value(config, "", "y")) + 2;
 			progress(game);
 		}
 	}

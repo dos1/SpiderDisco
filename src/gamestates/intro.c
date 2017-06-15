@@ -188,7 +188,7 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 
 	TM_AddAction(data->timeline, Show, TM_AddToArgs(NULL, 2, data, al_load_bitmap(GetDataFilePath(game, "intro/8.png"))), "show");
 	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/8.wav"), 4, 1024),
-	                                                 "Perhaps due to the fact that he constantly kept squishing his new family"), "speak");
+	                                                 "Perhaps due to the fact that he constantly kept squishing his new family,"), "speak");
 	progress(game);
 
 	TM_AddAction(data->timeline, Show, TM_AddToArgs(NULL, 2, data, al_load_bitmap(GetDataFilePath(game, "intro/9.png"))), "show");
