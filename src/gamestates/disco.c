@@ -372,7 +372,7 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	}
 
 
-	SetCharacterPosition(game, data->dron, 775 + cos(data->wind * 5) * 3, 268, 0);
+	SetCharacterPositionF(game, data->dron, (775.0 + cos(data->wind * 5) * 3) / 1920.0, 268.0 / 1080.0, 0);
 
 	al_draw_bitmap(data->shadow, 845 + 116 + data->noga3x, 150 + 100 + data->noga3y, 0);
 	al_draw_bitmap(data->shadow, 887 + 195 + data->noga4x, 268 + 125 + data->noga4y, 0);
@@ -383,7 +383,8 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	al_draw_rotated_bitmap(data->nozka4, 15, 108, 887 + 15 + data->noga4x, 268 + 108 + data->noga4y, -(cos(data->noga4 + ALLEGRO_PI) + 1) / 5.0, 0);
 	DrawCharacter(game, data->dron, al_map_rgb(255,255,255), 0);
 	al_draw_rotated_bitmap(data->nozka1, 234, 56, 589 + 234 + data->noga1x, 285 + 56 + data->noga1y, (cos(data->noga1 + ALLEGRO_PI) + 1) / 5.0, 0);
-	al_draw_rotated_bitmap(data->nozka2, 175, 16, 683 + 175 + data->noga2x, 379 + 16 + data->noga2y, (cos(data->noga2 + ALLEGRO_PI) + 1) / 5.0, 0);
+	al_draw_rotated_bitmap(data->nozka2, 175, 16, 683 + 175 + data->noga2x, 376 + 16 + data->noga2y, (cos(data->noga2 + ALLEGRO_PI) + 1) / 5.0, 0);
+
 	al_draw_bitmap(data->chleb, 775 + cos(data->wind * 5) * 3, 268, 0);
 
 
