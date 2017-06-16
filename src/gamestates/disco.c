@@ -88,8 +88,7 @@ int Gamestate_ProgressCount = 260 + NUMBER_OF_PAJONKS; // number of loading step
 void CheckCollision(struct Game *game, struct GamestateResources* data, int x, int y) {
 	bool dead = false;
 	for (int i=0; i<NUMBER_OF_PAJONKS; i++) {
-		if (IsOnCharacter(game, data->pajonczki[i], x+10, y+10) || IsOnCharacter(game, data->pajonczki[i], x+36, y+10)
-		    || IsOnCharacter(game, data->pajonczki[i], x+10, y+14) || IsOnCharacter(game, data->pajonczki[i], x+36, y+14)) {
+		if (IsOnCharacter(game, data->pajonczki[i], x+22, y+6)) {
 			SelectSpritesheet(game, data->pajonczki[i], "dead");
 			struct PajonkData *d = data->pajonczki[i]->data;
 			if (!d->dead) {
@@ -223,7 +222,12 @@ if (pos > 1) {
 	}
 
 	if (!al_get_audio_stream_playing(data->music)) {
-		SwitchCurrentGamestate(game, "outro");
+		if (game->data->score) {
+			SwitchCurrentGamestate(game, "outro");
+		} else {
+			al_rewind_audio_stream(data->music);
+			al_set_audio_stream_playing(data->music, true);
+		}
 	}
 }
 
