@@ -223,6 +223,7 @@ if (pos > 1) {
 
 	if (!al_get_audio_stream_playing(data->music)) {
 		if (game->data->score) {
+			game->data->darkloading = true;
 			SwitchCurrentGamestate(game, "outro");
 		} else {
 			al_rewind_audio_stream(data->music);
@@ -413,81 +414,10 @@ void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, 
 	// Called for each event in Allegro event queue.
 	// Here you can handle user input, expiring timers etc.
 	if ((ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE)) {
-		UnloadAllGamestates(game); // mark this gamestate to be stopped and unloaded
-		// When there are no active gamestates, the engine will quit.
+		game->data->darkloading = true;
+		game->data->skiptoend = true;
+		SwitchCurrentGamestate(game, "outro");
 	}
-
-/*	if (ev->type == ALLEGRO_EVENT_MOUSE_AXES) {
-			int mousex = ev->mouse.dx / (al_get_display_width(game->display) / 1920.0) / 10.0;
-			int mousey = 0;//ev->mouse.dy / (al_get_display_width(game->display) / 1080.0) / 10.0;
-
-			if (data->nozka == 1) {
-				data->noga1x += mousex;
-				data->noga1y += mousey;
-			} else if (data->nozka == 2) {
-				data->noga2x += mousex;
-				data->noga2y += mousey;
-			} else if (data->nozka == 3) {
-				data->noga3x += mousex;
-				data->noga3y += mousey;
-			} else if (data->nozka == 4) {
-				data->noga4x += mousex;
-				data->noga4y += mousey;
-			}
-
-			int range = 25;
-			if (data->noga1x < -range) {
-				data->noga1x = -range;
-			}
-			if (data->noga1x > range) {
-				data->noga1x = range;
-			}
-			if (data->noga2x < -range) {
-				data->noga2x = -range;
-			}
-			if (data->noga2x > range) {
-				data->noga2x = range;
-			}
-			if (data->noga3x < -range) {
-				data->noga3x = -range;
-			}
-			if (data->noga3x > range) {
-				data->noga3x = range;
-			}
-			if (data->noga4x < -range) {
-				data->noga4x = -range;
-			}
-			if (data->noga4x > range) {
-				data->noga4x = range;
-			}
-			if (data->noga1y < -range) {
-				data->noga1y = -range;
-			}
-			if (data->noga1y > range) {
-				data->noga1y = range;
-			}
-			if (data->noga2y < -range) {
-				data->noga2y = -range;
-			}
-			if (data->noga2y > range) {
-				data->noga2y = range;
-			}
-			if (data->noga3y < -range) {
-				data->noga3y = -range;
-			}
-			if (data->noga3y > range) {
-				data->noga3y = range;
-			}
-			if (data->noga4y < -range) {
-				data->noga4y = -range;
-			}
-			if (data->noga4y > range) {
-				data->noga4y = range;
-			}
-
-			al_set_mouse_xy(game->display, al_get_display_width(game->display) / 2, al_get_display_height(game->display) / 2);
-	}
-	*/
 
 	if ((ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_LEFT)) {
 		if (data->nozka == 1) {
@@ -585,95 +515,6 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 
 	data->matryca = al_load_bitmap(GetDataFilePath(game, "matryca.png"));
 	progress(game);
-
-	/*
-	 // mask generation code
-	al_lock_bitmap(data->matryca, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_READONLY);
-	for (int i=0; i<20; i++) {
-		for (int j=0; j<6; j++) {
-			data->pola[i][j].bmp = al_create_bitmap(872, 792);
-			data->pola[i][j].x1 = 1000;
-			data->pola[i][j].y1 = 1000;
-			data->pola[i][j].x2 = -1;
-			data->pola[i][j].y2 = -1;
-			al_lock_bitmap(data->pola[i][j].bmp, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_WRITEONLY);
-		}
-	}
-	data->duzepole.bmp = al_create_bitmap(872, 792);
-	al_lock_bitmap(data->duzepole.bmp, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_WRITEONLY);
-	ALLEGRO_COLOR transparent = al_map_rgba(0, 0, 0, 0);
-	ALLEGRO_COLOR black = al_map_rgba(0, 0, 0, 255);
-	for (int x=0; x<872; x++) {
-		for (int y=0; y<792; y++) {
-			ALLEGRO_COLOR color = al_get_pixel(data->matryca, x, y);
-			for (int i=0; i<20; i++) {
-				for (int j=0; j<6; j++) {
-					al_set_target_bitmap(data->pola[i][j].bmp);
-					al_put_pixel(x, y, transparent);
-					//PrintConsole(game, "r: %d, g: %d", color.r, color.g);
-					if (color.r*255 == 60 + i*10) {
-						if (color.g*255 == 100 + j*30) {
-							al_put_pixel(x, y, black);
-
-							if (data->pola[i][j].x1 > x) {
-								data->pola[i][j].x1 = x;
-							}
-							if (data->pola[i][j].y1 > y) {
-								data->pola[i][j].y1 = y;
-							}
-							if (data->pola[i][j].x2 < x) {
-								data->pola[i][j].x2 = x;
-							}
-							if (data->pola[i][j].y2 < y) {
-								data->pola[i][j].y2 = y;
-							}
-
-						}
-					}
-				}
-			}
-			al_set_target_bitmap(data->duzepole.bmp);
-			if (color.r*255 == 50) {
-				if (color.g*255 == 70) {
-					al_put_pixel(x, y, black);
-				}
-			}
-		}
-		progress(game);
-	}
-	for (int i=0; i<20; i++) {
-		for (int j=0; j<6; j++) {
-			al_unlock_bitmap(data->pola[i][j].bmp);
-
-			char filename[255];
-			snprintf(filename, 255, "mask-%d-%d.png", i, j);
-
-			ALLEGRO_BITMAP *tmp;
-			if (data->pola[i][j].x2 == -1) {
-				tmp = al_create_bitmap(1, 1);
-			} else {
-				tmp = al_create_bitmap(data->pola[i][j].x2 - data->pola[i][j].x1 + 1, data->pola[i][j].y2 - data->pola[i][j].y1 + 1);
-			}
-			al_set_target_bitmap(tmp);
-			al_clear_to_color(al_map_rgba(0,0,0,0));
-			al_draw_bitmap(data->pola[i][j].bmp, -data->pola[i][j].x1, -data->pola[i][j].y1, 0);
-
-			al_save_bitmap(filename, tmp);
-
-			ALLEGRO_CONFIG *config = al_create_config();
-			snprintf(filename, 255, "%d", data->pola[i][j].x1);
-			al_set_config_value(config, "", "x", filename);
-			snprintf(filename, 255, "%d", data->pola[i][j].y1);
-			al_set_config_value(config, "", "y", filename);
-			snprintf(filename, 255, "mask-%d-%d.ini", i, j);
-
-			al_save_config_file(filename, config);
-		}
-	}
-	al_unlock_bitmap(data->duzepole.bmp);
-	al_unlock_bitmap(data->matryca);
-	progress(game);
-	*/
 
 	for (int i=0; i<20; i++) {
 		for (int j=0; j<6; j++) {

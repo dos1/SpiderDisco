@@ -30,19 +30,21 @@ struct LoadingResources {
 
 void Progress(struct Game *game, struct LoadingResources *data, float p) {
 	al_set_target_bitmap(al_get_backbuffer(game->display));
-	al_clear_to_color(al_map_rgb(255,255,255));
-	al_draw_bitmap(data->loading_bitmap,game->viewport.width * 0.075, game->viewport.height*0.92,0);
-	AnimateCharacter(game, data->pajonczek, 1.5);
-	DrawCharacter(game, data->pajonczek, al_map_rgb(255,255,255), 0);
-	al_draw_filled_rectangle(0, game->viewport.height * 0.99, game->viewport.width,
-	                         game->viewport.height, al_map_rgba(0,0,0,32));
-	al_draw_filled_rectangle(0, game->viewport.height * 0.99, p*game->viewport.width,
-	                         game->viewport.height, al_map_rgba(0,0,0,255));
+	if (!game->data->darkloading) {
+		al_clear_to_color(al_map_rgb(255,255,255));
+		al_draw_bitmap(data->loading_bitmap, game->viewport.width * 0.075, game->viewport.height*0.92,0);
+		AnimateCharacter(game, data->pajonczek, 1.5);
+		DrawCharacter(game, data->pajonczek, al_map_rgb(255,255,255), 0);
+		al_draw_filled_rectangle(0, game->viewport.height * 0.99, game->viewport.width,
+		                         game->viewport.height, al_map_rgba(0,0,0,32));
+		al_draw_filled_rectangle(0, game->viewport.height * 0.99, p*game->viewport.width,
+		                         game->viewport.height, al_map_rgba(0,0,0,255));
+	} else {
+		al_clear_to_color(al_map_rgb(0,0,0));
+	}
 }
 
 void Draw(struct Game *game, struct LoadingResources *data, float p) {
-	al_draw_bitmap(data->loading_bitmap,0,0,0);
-	DrawCharacter(game, data->pajonczek, al_map_rgb(255,255,255), 0);
 	Progress(game, data, p);
 }
 

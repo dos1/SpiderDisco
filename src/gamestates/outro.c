@@ -39,7 +39,7 @@ static const char *reasons_common[] = {
   "You used to go out for karaoke",
   "Taught you how to play ukulele",
   "Showed you your favourite band",
-  "You were going to the cinema this weekend",
+  "You were going to go to the cinema this weekend",
   "Trusted you the most",
   "Just became a parent",
   "Always smiling",
@@ -384,6 +384,7 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 
 
 	data->music = al_load_audio_stream(GetDataFilePath(game, "cannonfodder.ogg"), 4, 1024);
+	al_set_audio_stream_playing(data->music, false);
 	al_attach_audio_stream_to_mixer(data->music, game->audio.music);
 	al_set_audio_stream_playmode(data->music, ALLEGRO_PLAYMODE_LOOP);
 
@@ -408,13 +409,14 @@ void Gamestate_Unload(struct Game *game, struct GamestateResources* data) {
 void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 	// Called when this gamestate gets control. Good place for initializing state,
 	// playing music etc.
+	game->data->darkloading = false;
+
 	data->blink_counter = 0;
 	data->pos = 1200;
 	data->counter = 0;
 	data->fade = 0;
 	data->in = true;
 	data->choice = 0;
-	PrintConsole(game, "score: %d", game->data->score);
 
 	data->creditnr = 0;
 	TM_AddDelay(data->credits, 1000);
@@ -427,6 +429,17 @@ void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 	TM_AddAction(data->credits, &AdvanceCredits, TM_AddToArgs(NULL, 1, data), "advance");
 	TM_AddDelay(data->credits, 4500);
 	TM_AddAction(data->credits, &AdvanceCredits, TM_AddToArgs(NULL, 1, data), "advance");
+
+	if (game->data->skiptoend) {
+		game->data->skiptoend = false;
+		data->creditnr = 5;
+		data->fade = 0;
+		data->in = false;
+	} else {
+		al_set_audio_stream_playing(data->music, true);
+	}
+
+	PrintConsole(game, "score: %d", game->data->score);
 }
 
 void Gamestate_Stop(struct Game *game, struct GamestateResources* data) {

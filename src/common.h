@@ -4,6 +4,8 @@
 struct CommonResources {
 		// Fill in with common data accessible from all gamestates.
 		int score;
+		bool darkloading;
+		bool skiptoend;
 };
 
 struct CommonResources* CreateGameData(struct Game *game);
