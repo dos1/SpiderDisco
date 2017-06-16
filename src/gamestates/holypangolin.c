@@ -39,7 +39,7 @@ int Gamestate_ProgressCount = 1; // number of loading steps as reported by Games
 void Gamestate_Logic(struct Game *game, struct GamestateResources* data) {
 	// Called 60 times per second. Here you should do all your game logic.
 	data->counter++;
-	if (data->counter > 60*6.5) {
+	if (data->counter > 60*5.2) {
 		SwitchCurrentGamestate(game, NEXT_GAMESTATE);
 	}
 }
@@ -52,7 +52,7 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	                      0, 0, game->viewport.width, game->viewport.height, 0);
 
 	if (data->counter < 320) {
-		al_draw_filled_rectangle(0, 0, 1920, 1080, al_map_rgba_f(1 - data->counter / 320.0, 1 - data->counter / 320.0, 1 - data->counter / 320.0, 1 - data->counter / 320.0));
+		al_draw_filled_rectangle(0, 0, 1920, 1080, al_map_rgba_f(1 - data->counter / 280.0, 1 - data->counter / 280.0, 1 - data->counter / 280.0, 1 - data->counter / 280.0));
 	}
 }
 
@@ -76,7 +76,7 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	data->monkeys = al_load_audio_stream(GetDataFilePath(game, "holy.flac"), 4, 1024);
 	al_set_audio_stream_playing(data->monkeys, false);
 	al_attach_audio_stream_to_mixer(data->monkeys, game->audio.fx);
-	al_set_audio_stream_gain(data->monkeys, 1.5);
+	al_set_audio_stream_gain(data->monkeys, 0.75);
 
 	return data;
 }
