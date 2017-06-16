@@ -69,12 +69,12 @@ static const char *reasons_female[] = {
 static const char *names_male[] = {
   "Rob", "John", "Zbyszek", "Frank", "Tom", "Sebastian", "David", "Mark", "Marty", "Marek",
   "Stefan", "Bob", "Paulo", "Julio", "Max", "Gandalf", "Otto", "Steve", "Justine", "Phil",
-  "Donald", "Robert", "Jackson", "Lucas", "Oliver", "Michael", "James", "Alex"
+  "Donald", "Marcin", "Jackson", "Lucas", "Oliver", "Michael", "James", "Alex", "Mickey", "Istvan"
 };
 static const char *names_female[] = {
   "Anne", "Mary", "Suzanne", "Ela", "Ola", "Marta", "Julie", "Stephanie", "Agata", "Claudia",
   "Laura", "Sophia", "Emma", "Olivia", "Zoe", "Lily", "Amelia", "Emily", "Chloe", "Shakira",
-  "Elaine", "Jasmine", "Angie", "April"
+  "Elaine", "Jasmine", "Angie", "April", "Kate", "Kasia", "Basia", "Zosia", "Eszter", "Hania"
 };
 
 struct GamestateResources {

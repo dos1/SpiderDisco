@@ -69,7 +69,8 @@ void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, 
 	// Here you can handle user input, expiring timers etc.
 	TM_HandleEvent(data->timeline, ev);
 	if ((ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE)) {
-		SwitchCurrentGamestate(game, "disco");
+		SwitchCurrentGamestate(game, "tutorial");
+		LoadGamestate(game, "disco");
 		// When there are no active gamestates, the engine will quit.
 	}
 	if ((ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_FULLSTOP)) {
@@ -82,8 +83,8 @@ void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, 
 bool Finish(struct Game *game, struct TM_Action *action, enum TM_ActionState state) {
 //	struct GamestateResources *data = TM_GetArg(action->arguments, 0);
 	if (state == TM_ACTIONSTATE_RUNNING) {
-		SwitchCurrentGamestate(game, "disco");
-
+		SwitchCurrentGamestate(game, "tutorial");
+		LoadGamestate(game, "disco");
 	}
 	return true;
 }

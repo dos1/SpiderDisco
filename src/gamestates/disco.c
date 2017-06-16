@@ -37,7 +37,7 @@ struct GamestateResources {
 		struct Character *pajonczek, *dron, *kula;
 		struct Character *pajonczki[NUMBER_OF_PAJONKS];
 
-		ALLEGRO_AUDIO_STREAM *music;//, *elevator;
+		ALLEGRO_AUDIO_STREAM *music;
 
 		ALLEGRO_SAMPLE *boom_sample, *death_sample;
 		ALLEGRO_SAMPLE_INSTANCE *boom, *death;
@@ -412,7 +412,7 @@ void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, 
 	// Called for each event in Allegro event queue.
 	// Here you can handle user input, expiring timers etc.
 	if ((ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE)) {
-		SwitchCurrentGamestate(game, "outro"); // mark this gamestate to be stopped and unloaded
+		UnloadAllGamestates(game); // mark this gamestate to be stopped and unloaded
 		// When there are no active gamestates, the engine will quit.
 	}
 
@@ -519,13 +519,6 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 
 	struct GamestateResources *data = malloc(sizeof(struct GamestateResources));
 	data->font = al_create_builtin_font();
-
-	/*data->elevator = al_load_audio_stream(GetDataFilePath(game, "elevator.flac"), 4, 1024);
-	al_set_audio_stream_playing(data->elevator, true);
-	al_attach_audio_stream_to_mixer(data->elevator, game->audio.music);
-	al_set_audio_stream_gain(data->elevator, 0.8);
-	al_set_audio_stream_playmode(data->elevator, ALLEGRO_PLAYMODE_LOOP);*/
-
 
 	data->boom_sample = al_load_sample( GetDataFilePath(game, "boom.flac") );
 	data->boom = al_create_sample_instance(data->boom_sample);
@@ -736,9 +729,6 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 		data->pajonczki[i]->data = malloc(sizeof(struct PajonkData));
 		progress(game);
 	}
-
-	/*al_set_audio_stream_playing(data->elevator, false);
-	al_destroy_audio_stream(data->elevator);*/
 
 	progress(game); // report that we progressed with the loading, so the engine can draw a progress bar
 	return data;
