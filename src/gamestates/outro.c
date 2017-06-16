@@ -93,12 +93,30 @@ struct GamestateResources {
 
 		float pos;
 
+		float fade;
+		int choice;
+		bool in;
+
 		bool used_common[sizeof(reasons_common) / sizeof(char*)];
 		bool used_male[sizeof(reasons_male) / sizeof(char*)];
 		bool used_female[sizeof(reasons_female) / sizeof(char*)];
+
+		ALLEGRO_SAMPLE *click_sample; /*!< Click sound sample. */
+		ALLEGRO_SAMPLE_INSTANCE *click; /*!< Sample instance with click sound. */
+
+		struct Timeline *credits;
+		int creditnr;
 };
 
 int Gamestate_ProgressCount = 1; // number of loading steps as reported by Gamestate_Load
+
+bool AdvanceCredits(struct Game *game, struct TM_Action *action, enum TM_ActionState state) {
+	struct GamestateResources *data = TM_GetArg(action->arguments, 0);
+	if (state == TM_ACTIONSTATE_RUNNING) {
+		data->creditnr++;
+	}
+	return true;
+}
 
 void Gamestate_Logic(struct Game *game, struct GamestateResources* data) {
 	// Called 60 times per second. Here you should do all your game logic.
@@ -116,7 +134,30 @@ void Gamestate_Logic(struct Game *game, struct GamestateResources* data) {
 		if (al_key_down(&kbd, ALLEGRO_KEY_SPACE)) {
 			data->pos -= 9.25;
 		}
+	} else {
+		data->in = false;
 	}
+
+	if (data->in) {
+		if (data->fade < 1) {
+			data->fade += 0.0025;
+		}
+	} else {
+		if (data->fade > 0) {
+			data->fade -= 0.0033;
+		} else {
+			TM_Process(data->credits);
+		}
+	}
+
+	if (data->creditnr >= 5) {
+		float gain = al_get_audio_stream_gain(data->music);
+		if (gain > 0) {
+			gain -= 0.0025;
+			al_set_audio_stream_gain(data->music, gain);
+		}
+	}
+
 }
 
 void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
@@ -126,15 +167,68 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	al_draw_bitmap(data->bg2, -240, -160,0);
 	al_draw_bitmap(data->bmp, 1920/2 - 30, data->pos, 0);
 
+	al_draw_filled_rectangle(0, 0, 1920, 1080, al_map_rgba_f(0,0,0,1-data->fade));
+
+	if (data->creditnr == 1) {
+		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 - 30, ALLEGRO_ALIGN_CENTER, "Made by");
+		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 + 30, ALLEGRO_ALIGN_CENTER, "Agata Nawrot and Sebastian Krzyszkowiak");
+	}
+	if (data->creditnr == 2) {
+		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 - 70, ALLEGRO_ALIGN_CENTER, "Music:");
+		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 - 10, ALLEGRO_ALIGN_CENTER, "Aurea Carmina - Kevin MacLeod (incompetech.com)");
+		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 + 50, ALLEGRO_ALIGN_CENTER, "Licensed under Creative Commons: By Attribution 3.0");
+	}
+
+	if (data->creditnr == 3) {
+		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 - 70, ALLEGRO_ALIGN_CENTER, "Music:");
+		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 - 10, ALLEGRO_ALIGN_CENTER, "Narcissus - Jon Hare");
+		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 + 50, ALLEGRO_ALIGN_CENTER, "Copyright by Sensible Software");
+	}
+	if (data->creditnr == 4) {
+		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 - 70, ALLEGRO_ALIGN_CENTER, "Music:");
+		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 - 10, ALLEGRO_ALIGN_CENTER, "Local Forecast (Elevator) - Kevin MacLeod (incompetech.com)");
+		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 + 50, ALLEGRO_ALIGN_CENTER, "Licensed under Creative Commons: By Attribution 3.0");
+	}
+
+	if (data->creditnr >= 5) {
+		ALLEGRO_COLOR color = al_map_rgb(255,240,(1-fabs(sin(data->counter * 64.0))) * 64 + 100);
+		ALLEGRO_COLOR white = al_map_rgb(255,255,255);
+		al_draw_text(data->font, (data->choice == 0) ? color : white, 1920/2.0, 1080/2.0 - 50, ALLEGRO_ALIGN_CENTER, "Play again");
+		al_draw_text(data->font, (data->choice == 0) ? white : color, 1920/2.0, 1080/2.0 + 50, ALLEGRO_ALIGN_CENTER, "Exit");
+
+		al_draw_text(data->font, al_map_rgb(255,255,255), 25, 1000, ALLEGRO_ALIGN_LEFT, "http://agatanawrot.com/");
+		al_draw_text(data->font, al_map_rgb(255,255,255), 1920-25, 1000, ALLEGRO_ALIGN_RIGHT, "https://dosowisko.net/");
+	}
 }
 
 void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, ALLEGRO_EVENT *ev) {
 	// Called for each event in Allegro event queue.
 	// Here you can handle user input, expiring timers etc.
+	TM_HandleEvent(data->credits, ev);
 	if ((ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE)) {
-		UnloadCurrentGamestate(game); // mark this gamestate to be stopped and unloaded
-		// When there are no active gamestates, the engine will quit.
+		if (data->creditnr < 5) {
+			data->creditnr = 5;
+			data->fade = 0;
+			data->in = false;
+		} else {
+			UnloadAllGamestates(game); // mark this gamestate to be stopped and unloaded
+			// When there are no active gamestates, the engine will quit.
+		}
 	}
+
+	if ((data->creditnr >= 5) && (ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ENTER)) {
+		UnloadAllGamestates(game); // mark this gamestate to be stopped and unloaded
+		// When there are no active gamestates, the engine will quit.
+		if (data->choice == 0) {
+			SwitchCurrentGamestate(game, "intro");
+		}
+	}
+
+	if ((data->creditnr >= 5) && (ev->type==ALLEGRO_EVENT_KEY_DOWN) && ((ev->keyboard.keycode == ALLEGRO_KEY_UP) || (ev->keyboard.keycode == ALLEGRO_KEY_DOWN))) {
+		data->choice = !data->choice;
+		al_play_sample_instance(data->click);
+	}
+
 }
 
 void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
@@ -144,7 +238,9 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	data->font = al_load_ttf_font(GetDataFilePath(game, "fonts/belligerent.ttf"), 48, 0);
 	progress(game); // report that we progressed with the loading, so the engine can draw a progress bar
 
-	//game->data->score = 30;
+	//game->data->score = 12;
+
+	data->credits = TM_Init(game, "credits");
 
 	for (int i=0; i<(sizeof(data->used_common)/sizeof(bool)); i++) {
 		data->used_common[i] = false;
@@ -173,8 +269,12 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 
 	al_draw_text(data->font, al_map_rgb(0,0,0), 1920/4, 10, ALLEGRO_ALIGN_CENTER, "IN MEMORY OF");
 
-	for (int i=0; i<game->data->score; i++) {
+	data->click_sample = al_load_sample( GetDataFilePath(game, "click.flac") );
+	data->click = al_create_sample_instance(data->click_sample);
+	al_attach_sample_instance_to_mixer(data->click, game->audio.fx);
+	al_set_sample_instance_playmode(data->click, ALLEGRO_PLAYMODE_ONCE);
 
+	for (int i=0; i<game->data->score; i++) {
 
 		bool left = false;
 		for (int i=0; i<(sizeof(data->used_common)/sizeof(bool)); i++) {
@@ -211,8 +311,6 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 				data->used_female[i] = false;
 			}
 		}
-
-
 
 		bool girl = false;
 		if ((rand() / (float)RAND_MAX) <= 0.4) {
@@ -311,9 +409,24 @@ void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 	// Called when this gamestate gets control. Good place for initializing state,
 	// playing music etc.
 	data->blink_counter = 0;
-	data->pos = 1080;
+	data->pos = 1200;
 	data->counter = 0;
+	data->fade = 0;
+	data->in = true;
+	data->choice = 0;
 	PrintConsole(game, "score: %d", game->data->score);
+
+	data->creditnr = 0;
+	TM_AddDelay(data->credits, 1000);
+	TM_AddAction(data->credits, &AdvanceCredits, TM_AddToArgs(NULL, 1, data), "advance");
+	TM_AddDelay(data->credits, 4500);
+	TM_AddAction(data->credits, &AdvanceCredits, TM_AddToArgs(NULL, 1, data), "advance");
+	TM_AddDelay(data->credits, 4500);
+	TM_AddAction(data->credits, &AdvanceCredits, TM_AddToArgs(NULL, 1, data), "advance");
+	TM_AddDelay(data->credits, 4500);
+	TM_AddAction(data->credits, &AdvanceCredits, TM_AddToArgs(NULL, 1, data), "advance");
+	TM_AddDelay(data->credits, 4500);
+	TM_AddAction(data->credits, &AdvanceCredits, TM_AddToArgs(NULL, 1, data), "advance");
 }
 
 void Gamestate_Stop(struct Game *game, struct GamestateResources* data) {
