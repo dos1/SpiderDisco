@@ -42,8 +42,11 @@ struct GamestateResources {
 		ALLEGRO_SAMPLE *boom_sample, *death_sample;
 		ALLEGRO_SAMPLE_INSTANCE *boom, *death;
 
-		ALLEGRO_SAMPLE *oops_samples[17];
-		ALLEGRO_SAMPLE_INSTANCE *oops[17];
+		struct {
+				ALLEGRO_SAMPLE *sample;
+				ALLEGRO_SAMPLE_INSTANCE *sound;
+				bool used;
+		} oops[17];
 
 		ALLEGRO_BITMAP *bg, *web;
 		ALLEGRO_BITMAP *disco[6], *matryca;
@@ -102,7 +105,24 @@ void CheckCollision(struct Game *game, struct GamestateResources* data, int x, i
 	data->shake = rand() % 10 + 25;
 	if (dead) {
 		al_play_sample_instance(data->death);
-		al_play_sample_instance(data->oops[rand() % 17]);
+		int r = rand() % 17;
+		int i = r + 1;
+		do {
+			if (i > 16) {
+				i = 0;
+			}
+			if (!data->oops[i].used) {
+				break;
+			}
+			i++;
+		} while (r != i);
+		if (r == i) {
+			for (int j=0; j<17; j++) {
+				data->oops[j].used = false;
+			}
+		}
+		al_play_sample_instance(data->oops[i].sound);
+		data->oops[i].used = true;
 	}
 }
 
@@ -408,6 +428,11 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 
 	al_draw_tinted_bitmap(data->cien, al_map_rgba_f(0.1,0.1,0.1,0.4), 1282, -363,0);
 
+	/*for (int i=0; i<17; i++) {
+		al_draw_filled_rectangle(100*i+100, 1080-100, 100*i+200, 1080, data->oops[i].used ? al_map_rgb(255,0,0) : al_map_rgb(255,255,255));
+		al_draw_rectangle(100*i+100, 1080-100, 100*i+200, 1080, al_map_rgb(0,0,0), 2);
+	}*/
+
 }
 
 void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, ALLEGRO_EVENT *ev) {
@@ -468,10 +493,10 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 		char *filename = malloc(255 * sizeof(char));
 		snprintf(filename, 255, "oops/%d.wav", i);
 
-		data->oops_samples[i] = al_load_sample( GetDataFilePath(game, filename) );
-		data->oops[i] = al_create_sample_instance(data->oops_samples[i]);
-		al_attach_sample_instance_to_mixer(data->oops[i], game->audio.voice);
-		al_set_sample_instance_playmode(data->oops[i], ALLEGRO_PLAYMODE_ONCE);
+		data->oops[i].sample = al_load_sample( GetDataFilePath(game, filename) );
+		data->oops[i].sound = al_create_sample_instance(data->oops[i].sample);
+		al_attach_sample_instance_to_mixer(data->oops[i].sound, game->audio.voice);
+		al_set_sample_instance_playmode(data->oops[i].sound, ALLEGRO_PLAYMODE_ONCE);
 		free(filename);
 	}
 
@@ -596,8 +621,8 @@ void Gamestate_Unload(struct Game *game, struct GamestateResources* data) {
 	al_destroy_sample(data->death_sample);
 
 	for (int i=0; i<17; i++) {
-		al_destroy_sample_instance(data->oops[i]);
-		al_destroy_sample(data->oops_samples[i]);
+		al_destroy_sample_instance(data->oops[i].sound);
+		al_destroy_sample(data->oops[i].sample);
 	}
 
 	al_destroy_bitmap(data->bg);
@@ -649,6 +674,9 @@ void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 
 	SelectSpritesheet(game, data->kula, "kula");
 
+	for (int i=0; i<17; i++) {
+		data->oops[i].used = false;
+	}
 
 	for (int i=0; i<NUMBER_OF_PAJONKS; i++) {
 		SelectSpritesheet(game, data->pajonczki[i], "stand");
