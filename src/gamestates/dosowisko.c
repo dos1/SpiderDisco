@@ -171,7 +171,7 @@ void Gamestate_Start(struct Game *game, struct GamestateResources* data) {
 
 void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, ALLEGRO_EVENT *ev) {
 	TM_HandleEvent(data->timeline, ev);
-	if ((ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE)) {
+	if (((ev->type==ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ESCAPE)) || (ev->type == ALLEGRO_EVENT_TOUCH_END)) {
 		SwitchCurrentGamestate(game, SKIP_GAMESTATE);
 		if (strcmp(SKIP_GAMESTATE, NEXT_GAMESTATE) != 0) {
 			UnloadGamestate(game, NEXT_GAMESTATE);
@@ -182,9 +182,9 @@ void Gamestate_ProcessEvent(struct Game *game, struct GamestateResources* data, 
 void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	struct GamestateResources *data = malloc(sizeof(struct GamestateResources));
 	data->timeline = TM_Init(game, "main");
-	data->bitmap = al_create_bitmap(320, 180);
+	data->bitmap = CreateNotPreservedBitmap(320, 180);
 	data->checkerboard = al_create_bitmap(320, 180);
-	data->pixelator = al_create_bitmap(320, 180);
+	data->pixelator = CreateNotPreservedBitmap(320, 180);
 
 	al_set_target_bitmap(data->checkerboard);
 	al_lock_bitmap(data->checkerboard, ALLEGRO_PIXEL_FORMAT_ANY, ALLEGRO_LOCK_WRITEONLY);
@@ -246,7 +246,10 @@ void Gamestate_Unload(struct Game *game, struct GamestateResources* data) {
 	free(data);
 }
 
-void Gamestate_Reload(struct Game *game, struct GamestateResources* data) {}
+void Gamestate_Reload(struct Game *game, struct GamestateResources* data) {
+	data->bitmap = CreateNotPreservedBitmap(320, 180);
+	data->pixelator = CreateNotPreservedBitmap(320, 180);
+}
 
 void Gamestate_Pause(struct Game *game, struct GamestateResources* data) {
 	TM_Pause(data->timeline);
