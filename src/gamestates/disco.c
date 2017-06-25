@@ -491,7 +491,7 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 
 	for (int i=0; i<17; i++) {
 		char *filename = malloc(255 * sizeof(char));
-		snprintf(filename, 255, "oops/%d.wav", i);
+		snprintf(filename, 255, "oops/%d.flac", i);
 
 		data->oops[i].sample = al_load_sample( GetDataFilePath(game, filename) );
 		data->oops[i].sound = al_create_sample_instance(data->oops[i].sample);

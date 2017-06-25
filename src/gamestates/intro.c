@@ -147,67 +147,67 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 
 	TM_AddAction(data->timeline, Show, TM_AddToArgs(NULL, 2, data, al_load_bitmap(GetDataFilePath(game, "intro/1.png"))), "show");
 	TM_AddDelay(data->timeline, 400);
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/1.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/1.flac"), 4, 1024),
 	                                                 "Once upon a time there was a little drone named Bobby."), "speak");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/1a.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/1a.flac"), 4, 1024),
 	                                                 "Bobby had a human owner, who was a reckless boy."), "speak");
 	progress(game);
 
 	TM_AddAction(data->timeline, Show, TM_AddToArgs(NULL, 2, data, al_load_bitmap(GetDataFilePath(game, "intro/2.png"))), "show");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/2.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/2.flac"), 4, 1024),
 	                                                 "One day he crashed Bobby into the trees and ran away."), "speak");
 	progress(game);
 
 	TM_AddAction(data->timeline, Show, TM_AddToArgs(NULL, 2, data, al_load_bitmap(GetDataFilePath(game, "intro/3.png"))), "show");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/3.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/3.flac"), 4, 1024),
 	                                                 "Fortunately, the drone was rescued by a huge family of overprotective spiders."), "speak");
 	progress(game);
 
 	TM_AddAction(data->timeline, Show, TM_AddToArgs(NULL, 2, data, al_load_bitmap(GetDataFilePath(game, "intro/4.png"))), "show");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/4.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/4.flac"), 4, 1024),
 	                                                 "They lived happily for some time."), "speak");
 	progress(game);
 
 	TM_AddAction(data->timeline, Show, TM_AddToArgs(NULL, 2, data, al_load_bitmap(GetDataFilePath(game, "intro/5.png"))), "show");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/5.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/5.flac"), 4, 1024),
 	                                                 "He grew up with them, learned their ways: playing typical spider sports"), "speak");
 	progress(game);
 
 	TM_AddAction(data->timeline, Show, TM_AddToArgs(NULL, 2, data, al_load_bitmap(GetDataFilePath(game, "intro/6.png"))), "show");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/6.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/6.flac"), 4, 1024),
 	                                                 "and traditional spider dinner parties."), "speak");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/6a.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/6a.flac"), 4, 1024),
 	                                                 "They accepted him."), "speak");
 	progress(game);
 
 	TM_AddAction(data->timeline, Show, TM_AddToArgs(NULL, 2, data, al_load_bitmap(GetDataFilePath(game, "intro/7.png"))), "show");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/7.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/7.flac"), 4, 1024),
 	                                                 "But he still felt quite out of place."), "speak");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/7a.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/7a.flac"), 4, 1024),
 	                                                 "Perhaps due to the fact that he constantly kept squishing his new family,"), "speak");
 	progress(game);
 
 	TM_AddAction(data->timeline, Show, TM_AddToArgs(NULL, 2, data, al_load_bitmap(GetDataFilePath(game, "intro/8.png"))), "show");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/8.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/8.flac"), 4, 1024),
 	                                                 "Perhaps due to the fact that he constantly kept squishing his new family,"), "speak");
 	progress(game);
 
 	TM_AddAction(data->timeline, Show, TM_AddToArgs(NULL, 2, data, al_load_bitmap(GetDataFilePath(game, "intro/9.png"))), "show");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/9.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/9.flac"), 4, 1024),
 	                                                 "which led him to a personality crisis."), "speak");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/9a.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/9a.flac"), 4, 1024),
 	                                                 "Spiders might be very forgiving, but he's a very emotional fella."), "speak");
 	progress(game);
 
 	TM_AddAction(data->timeline, Show, TM_AddToArgs(NULL, 2, data, al_load_bitmap(GetDataFilePath(game, "intro/10.png"))), "show");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/10.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/10.flac"), 4, 1024),
 	                                                 "Now Bobby wants to learn how to move like a spider."), "speak");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/10a.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/10a.flac"), 4, 1024),
 	                                                 "So he gathered his friends and went to the..."), "speak");
 	progress(game);
 
 	TM_AddAction(data->timeline, Show, TM_AddToArgs(NULL, 2, data, al_load_bitmap(GetDataFilePath(game, "intro/11.png"))), "show");
-	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/11.wav"), 4, 1024),
+	TM_AddAction(data->timeline, Speak, TM_AddToArgs(NULL, 3, data, al_load_audio_stream(GetDataFilePath(game, "intro/11.flac"), 4, 1024),
 	                                                 NULL), "speak");
 
 	TM_AddDelay(data->timeline, 1000);
