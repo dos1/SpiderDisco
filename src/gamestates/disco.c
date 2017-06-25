@@ -535,8 +535,8 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 	data->cien = al_load_bitmap(GetDataFilePath(game, "07_cien.png"));
 	progress(game);
 
-	data->tmp = al_create_bitmap(1920, 1080);
-	data->mask = al_create_bitmap(1920, 1080);
+	data->tmp = CreateNotPreservedBitmap(1920, 1080);
+	data->mask = CreateNotPreservedBitmap(1920, 1080);
 
 	data->matryca = al_load_bitmap(GetDataFilePath(game, "matryca.png"));
 	progress(game);

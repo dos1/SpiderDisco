@@ -182,7 +182,7 @@ void Gamestate_Draw(struct Game *game, struct GamestateResources* data) {
 	if (data->creditnr == 3) {
 		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 - 70, ALLEGRO_ALIGN_CENTER, "Music:");
 		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 - 10, ALLEGRO_ALIGN_CENTER, "Narcissus - Jon Hare");
-		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 + 50, ALLEGRO_ALIGN_CENTER, "Copyright by Sensible Software");
+		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 + 50, ALLEGRO_ALIGN_CENTER, "Licensed by Sensible Soundware Limited");
 	}
 	if (data->creditnr == 4) {
 		al_draw_text(data->font, al_map_rgb(255,255,255), 1920/2.0, 1080/2.0 - 70, ALLEGRO_ALIGN_CENTER, "Music:");
@@ -261,9 +261,9 @@ void* Gamestate_Load(struct Game *game, void (*progress)(struct Game*)) {
 
 	data->wstazka = al_load_bitmap(GetDataFilePath(game, "polaroid_kokardka.png"));
 
-	data->tmp = al_create_bitmap(300, 300);
+	data->tmp = CreateNotPreservedBitmap(300, 300);
 
-	data->bmp = al_create_bitmap(1920/2 + 200, 100 + 300*game->data->score + 550);
+	data->bmp = CreateNotPreservedBitmap(1920/2 + 200, 100 + 300*game->data->score + 550);
 	al_set_target_bitmap(data->bmp);
 	al_clear_to_color(al_map_rgba(0,0,0,0));
 
