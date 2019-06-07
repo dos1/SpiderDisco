@@ -1,7 +1,1 @@
-register_gamestate("loading")
-register_gamestate("dosowisko")
-register_gamestate("holypangolin")
-register_gamestate("tutorial")
-register_gamestate("disco")
-register_gamestate("intro")
-register_gamestate("outro")
+include(libsuperderpy-gamestates)

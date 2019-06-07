@@ -1,5 +1,5 @@
 /*! \file main.c
- *  \brief Main file of Super Examples.
+ *  \brief Main file of Spider Disco.
  */
 /*
  * Copyright (c) Sebastian Krzyszkowiak <dos@dosowisko.net>
@@ -19,13 +19,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "defines.h"
-#include <stdio.h>
-#include <signal.h>
 #include "common.h"
+#include "defines.h"
 #include <libsuperderpy.h>
+#include <signal.h>
+#include <stdio.h>
 
-void derp(int sig) {
+static _Noreturn void derp(int sig) {
 	ssize_t __attribute__((unused)) n = write(STDERR_FILENO, "Segmentation fault\nI just don't know what went wrong!\n", 54);
 	abort();
 }
@@ -38,10 +38,16 @@ int main(int argc, char** argv) {
 	al_set_org_name("dosowisko.net");
 	al_set_app_name(LIBSUPERDERPY_GAMENAME_PRETTY);
 
-	struct Game *game = libsuperderpy_init(argc, argv, LIBSUPERDERPY_GAMENAME, (struct Viewport){1920, 1080});
+	struct Game* game = libsuperderpy_init(argc, argv, LIBSUPERDERPY_GAMENAME,
+		(struct Params){
+			1920,
+			1080,
+			.handlers = (struct Handlers){
+				.event = GlobalEventHandler,
+				.destroy = DestroyGameData,
+			},
+		});
 	if (!game) { return 1; }
-
-	al_set_window_title(game->display, LIBSUPERDERPY_GAMENAME_PRETTY);
 
 	LoadGamestate(game, "dosowisko");
 	LoadGamestate(game, "holypangolin");
@@ -49,11 +55,7 @@ int main(int argc, char** argv) {
 
 	game->data = CreateGameData(game);
 
-	libsuperderpy_run(game);
+	al_hide_mouse_cursor(game->display);
 
-	DestroyGameData(game, game->data);
-
-	libsuperderpy_destroy(game);
-
-	return 0;
+	return libsuperderpy_run(game);
 }

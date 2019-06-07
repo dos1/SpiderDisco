@@ -22,15 +22,32 @@
 #include "common.h"
 #include <libsuperderpy.h>
 
-struct CommonResources* CreateGameData(struct Game *game) {
-	struct CommonResources *data = calloc(1, sizeof(struct CommonResources));
+bool GlobalEventHandler(struct Game* game, ALLEGRO_EVENT* ev) {
+	if ((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_M)) {
+		ToggleMute(game);
+	}
+
+	if ((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_F)) {
+		ToggleFullscreen(game);
+	}
+
+#ifdef ALLEGRO_ANDROID
+	if ((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_BACK)) {
+		QuitGame(game, true);
+	}
+#endif
+
+	return false;
+}
+
+struct CommonResources* CreateGameData(struct Game* game) {
+	struct CommonResources* data = calloc(1, sizeof(struct CommonResources));
 	data->score = 0;
 	data->darkloading = false;
 	data->skiptoend = false;
 	return data;
 }
 
-void DestroyGameData(struct Game *game, struct CommonResources *data) {
-	free(data);
+void DestroyGameData(struct Game* game) {
+	free(game->data);
 }
-
