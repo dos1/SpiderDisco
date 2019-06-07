@@ -32,25 +32,25 @@ static const char* reasons_common[] = {
 	"You had a good time hiking last summer",
 	"Had awesome ideas at game jams",
 	"Introduced you to your wife",
-	"Quite good looking cousin",
+	"Quite a good looking cousin",
 	"Was always there for you",
 	"You two had a nice time on a game jam",
-	"Never forgot your birthday",
+	"Never forgot about your birthday",
 	"You used to go out for karaoke",
 	"Taught you how to play ukulele",
-	"Showed you your favourite band",
+	"Introduced you to your favourite band",
 	"You were going to go to the cinema this weekend",
 	"Trusted you the most",
 	"Just became a parent",
 	"Always smiling",
 	"Liked the same music as you do",
-	"Shared the Netflix account with you",
+	"Shared a Netflix account with you",
 	"Gave the best WALL-E impressions",
-	"Was able to perform perfect moonwalk",
+	"Was able to perform a perfect moonwalk",
 	"Left WoW for some dancing for the first time",
 	"You met on the Web"};
 static const char* reasons_male[] = {
-	"Was the witness at your wedding",
+	"The witness at your wedding",
 	"This one funny guy at your workplace",
 	"Your brother",
 	"You couldn't remember his last name",
@@ -101,6 +101,7 @@ struct GamestateResources {
 
 	struct Timeline* credits;
 	int creditnr;
+	bool skipping;
 };
 
 int Gamestate_ProgressCount = 1; // number of loading steps as reported by Gamestate_Load
@@ -125,10 +126,7 @@ void Gamestate_Tick(struct Game* game, struct GamestateResources* data) {
 	if (data->pos > -(100 + 300 * game->data->score + 250)) {
 		data->pos -= 0.75;
 
-		ALLEGRO_KEYBOARD_STATE kbd;
-		al_get_keyboard_state(&kbd);
-
-		if (al_key_down(&kbd, ALLEGRO_KEY_SPACE)) {
+		if (data->skipping) {
 			data->pos -= 9.25;
 		}
 	} else {
@@ -159,9 +157,11 @@ void Gamestate_Tick(struct Game* game, struct GamestateResources* data) {
 void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 	// Called as soon as possible, but no sooner than next Gamestate_Logic call.
 	// Draw everything to the screen here.
-	al_draw_bitmap(data->bg, -240 + sin(data->counter) * 200, -160, 0);
-	al_draw_bitmap(data->bg2, -240, -160, 0);
-	al_draw_bitmap(data->bmp, 1920 / 2 - 30, data->pos, 0);
+	if (data->fade > 0.0) {
+		al_draw_bitmap(data->bg, -240 + sin(data->counter) * 200, -160, 0);
+		al_draw_bitmap(data->bg2, -240, -160, 0);
+		al_draw_bitmap(data->bmp, 1920 / 2 - 30, data->pos, 0);
+	}
 
 	al_draw_filled_rectangle(0, 0, 1920, 1080, al_map_rgba_f(0, 0, 0, 1 - data->fade));
 
@@ -192,7 +192,7 @@ void Gamestate_Draw(struct Game* game, struct GamestateResources* data) {
 		al_draw_text(data->font, (data->choice == 0) ? color : white, 1920 / 2.0, 1080 / 2.0 - 50, ALLEGRO_ALIGN_CENTER, "Play again");
 		al_draw_text(data->font, (data->choice == 0) ? white : color, 1920 / 2.0, 1080 / 2.0 + 50, ALLEGRO_ALIGN_CENTER, "Exit");
 
-		al_draw_text(data->font, al_map_rgb(255, 255, 255), 25, 1000, ALLEGRO_ALIGN_LEFT, "http://agatanawrot.com/");
+		al_draw_text(data->font, al_map_rgb(255, 255, 255), 25, 1000, ALLEGRO_ALIGN_LEFT, "https://agatanawrot.com/");
 		al_draw_text(data->font, al_map_rgb(255, 255, 255), 1920 - 25, 1000, ALLEGRO_ALIGN_RIGHT, "https://dosowisko.net/");
 	}
 }
@@ -211,7 +211,14 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 		}
 	}
 
-	if ((data->creditnr >= 5) && (ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ENTER)) {
+	if ((ev->type == ALLEGRO_EVENT_KEY_DOWN) || (ev->type == ALLEGRO_EVENT_TOUCH_BEGIN) || (ev->type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN)) {
+		data->skipping = true;
+	}
+	if ((ev->type == ALLEGRO_EVENT_KEY_UP) || (ev->type == ALLEGRO_EVENT_TOUCH_END) || (ev->type == ALLEGRO_EVENT_TOUCH_CANCEL) || (ev->type == ALLEGRO_EVENT_JOYSTICK_BUTTON_UP)) {
+		data->skipping = false;
+	}
+
+	if ((data->creditnr >= 5) && (((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_ENTER)) || (ev->type == ALLEGRO_EVENT_JOYSTICK_BUTTON_DOWN))) {
 		UnloadAllGamestates(game); // mark this gamestate to be stopped and unloaded
 		// When there are no active gamestates, the engine will quit.
 		if (data->choice == 0) {

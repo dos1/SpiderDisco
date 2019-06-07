@@ -86,7 +86,7 @@ struct PajonkData {
 	bool dead;
 };
 
-int Gamestate_ProgressCount = 260 + NUMBER_OF_PAJONKS; // number of loading steps as reported by Gamestate_Load
+int Gamestate_ProgressCount = 264 + NUMBER_OF_PAJONKS; // number of loading steps as reported by Gamestate_Load
 
 void CheckCollision(struct Game* game, struct GamestateResources* data, int x, int y) {
 	bool dead = false;
@@ -440,7 +440,9 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 		SwitchCurrentGamestate(game, "outro");
 	}
 
-	if ((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_LEFT)) {
+	if (((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_LEFT)) ||
+		((ev->type == ALLEGRO_EVENT_TOUCH_BEGIN) && (ev->touch.x < al_get_display_width(game->display) / 2.0)) ||
+		((ev->type == ALLEGRO_EVENT_JOYSTICK_AXIS) && (ev->joystick.pos < -0.5))) {
 		if (data->nozka == 1) {
 			data->noga1b = false;
 		} else if (data->nozka == 2) {
@@ -451,7 +453,9 @@ void Gamestate_ProcessEvent(struct Game* game, struct GamestateResources* data, 
 			data->noga4b = false;
 		}
 	}
-	if ((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_RIGHT)) {
+	if (((ev->type == ALLEGRO_EVENT_KEY_DOWN) && (ev->keyboard.keycode == ALLEGRO_KEY_RIGHT)) ||
+		((ev->type == ALLEGRO_EVENT_TOUCH_BEGIN) && (ev->touch.x >= al_get_display_width(game->display) / 2.0)) ||
+		((ev->type == ALLEGRO_EVENT_JOYSTICK_AXIS) && (ev->joystick.pos > 0.5))) {
 		if (data->nozka == 1) {
 			data->noga1b = true;
 		} else if (data->nozka == 2) {
