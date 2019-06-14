@@ -414,6 +414,7 @@ void Gamestate_Start(struct Game* game, struct GamestateResources* data) {
 	data->fade = 0;
 	data->in = true;
 	data->choice = 0;
+	data->skipping = false;
 
 	data->creditnr = 0;
 	TM_AddDelay(data->credits, 1.0);
